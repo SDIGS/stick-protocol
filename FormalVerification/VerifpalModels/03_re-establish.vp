@@ -5,8 +5,8 @@ attacker[active] // An active attacker
 principal Device1[
     knows private ikPriv, spkPriv, opkPriv
     ikPub = G^ikPriv
-	spkPub = G^spkPriv
-	opkPub = G^opkPriv
+    spkPub = G^spkPriv
+    opkPub = G^opkPriv
     knows password alicePass
     knows password alicePass2
 ]
