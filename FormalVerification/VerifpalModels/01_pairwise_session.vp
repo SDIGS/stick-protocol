@@ -23,7 +23,7 @@ principal Alice[
 	generates aEk1Priv // ephemeral key
 	aEk1Pub = G^aEk1Priv
 	aMasterSec = HASH(bSpkPub^aIkPriv, bIkPub^aEk1Priv,
-	 bSpkPub^aEk1Priv, bOpkPub^aEk1Priv) // HASH/KDF
+        bSpkPub^aEk1Priv, bOpkPub^aEk1Priv) // HASH/KDF
 
 	// The master secret goes into a HKDF to make the initial Root Key aRK1,
 	// in addition to the initial receiving chain key aCkBA1
@@ -57,7 +57,7 @@ Alice -> Bob: [aIkPub], aEk1Pub, aEk2Pub, msg1Enc
 
 principal Bob[
 	bMaster = HASH(aIkPub^bSpkPriv, aEk1Pub^bIkPriv, aEk1Pub^bSpkPriv, aEk1Pub^bOpkPriv)
-	brkba1, bckba1 = HKDF(bmaster, nil, nil) // Root key and sending chain key
+	brkba1, bckba1 = HKDF(bMaster, nil, nil) // Root key and sending chain key
 ]
 
 principal Bob[
