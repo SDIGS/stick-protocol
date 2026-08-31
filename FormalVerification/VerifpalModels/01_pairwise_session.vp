@@ -23,7 +23,7 @@ principal Alice[
 	generates aEk1Priv // ephemeral key
 	aEk1Pub = G^aEk1Priv
 	aMasterSec = HASH(bSpkPub^aIkPriv, bIkPub^aEk1Priv,
-        bSpkPub^aEk1Priv, bOpkPub^aEk1Priv) // HASH/KDF
+		bSpkPub^aEk1Priv, bOpkPub^aEk1Priv) // HASH/KDF
 
 	// The master secret goes into a HKDF to make the initial Root Key aRK1,
 	// in addition to the initial receiving chain key aCkBA1
@@ -75,6 +75,6 @@ principal Bob[leaks bIkPriv, bSpkPriv]
 
 // Here we ask our queries
 queries[
-    authentication? Alice -> Bob: msg1Enc // Was the encrypted msg successfully authenticated from Alice to Bob?
+	authentication? Alice -> Bob: msg1Enc // Was the encrypted msg successfully authenticated from Alice to Bob?
 	confidentiality? msg1 // Was msg1 confidential?
 ]

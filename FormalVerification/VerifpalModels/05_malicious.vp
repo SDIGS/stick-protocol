@@ -9,7 +9,7 @@ principal Alice[
 ]
 
 principal Alice[
-    generates post
+	generates post
 	chainKey2, messageKey = HKDF(MAC(aChainKey, nil), nil, nil) // Derive new message key
 	postEnc = ENC(messageKey, post) // Encrypt the blob secret
 	postSigned = SIGN(aSigPriv, postEnc) // Sign the encrypted post
@@ -18,14 +18,14 @@ principal Alice[
 Alice -> Server: [aChainKey], [aSigPub], postEnc, postSigned
 
 principal Server[
-    generates malPart
-    malpost = CONCAT(postEnc, malPart)
+	generates malPart
+	malpost = CONCAT(postEnc, malPart)
 ]
 
 Server -> Bob: [aChainKey], [aSigPub], malpost, postSigned
 
 principal Bob[
-    _ = SIGNVERIF(aSigPub, malpost, postSigned)? // Verify signature, test should fail here
+	_ = SIGNVERIF(aSigPub, malpost, postSigned)? // Verify signature, test should fail here
 	chainKey2B, messageKeyB = HKDF(MAC(aChainKey, nil), nil, nil) // derives message key
 	postDec = DEC(messageKeyB, malpost) // Decrypt the blob secret
 ]

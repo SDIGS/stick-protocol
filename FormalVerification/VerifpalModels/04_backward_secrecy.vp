@@ -20,7 +20,7 @@ principal Alice[
 ]
 
 principal Alice[
-    generates postY
+	generates postY
 	aChainKeyY2, messageKeyY = HKDF(MAC(aChainKeyY, nil), nil, nil) // Derive new message key
 	postYEnc = ENC(messageKeyY, postY) // Encrypt the blob secret
 	postYSigned = SIGN(aSigPrivY, postYEnc) // Sign the encrypted msg
