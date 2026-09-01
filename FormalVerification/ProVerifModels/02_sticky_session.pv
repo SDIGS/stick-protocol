@@ -1,0 +1,131 @@
+(* Author: Diego Bertola *)
+(* ====================================================================
+   STICK PROTOCOL - 02_STICKY_SESSION
+   ==================================================================== *)
+
+(* --- 1. INFRASTRUCTURE AND TYPES --- *)
+free c: channel.
+
+(* This is the ultimate secret we want to protect *)
+free photo: bitstring [private].
+
+type exponent.
+type G.
+
+(* Global constant to represent Verifpal's "nil" parameters *)
+const nil: bitstring.
+
+const g: G.
+fun pk(exponent): G.
+
+(* --- 2. CRYPTOGRAPHIC PRIMITIVES --- *)
+
+(* MAC *)
+fun mac(bitstring, bitstring): bitstring.
+
+(* HKDF (Split into two functions to represent the two outputs: chainKey and messageKey) *)
+fun hkdf_ck(bitstring, bitstring): bitstring.
+fun hkdf_mk(bitstring, bitstring): bitstring.
+
+(* Symmetric Encryption *)
+fun senc(bitstring, bitstring): bitstring.
+reduc forall msg: bitstring, k: bitstring; sdec(senc(msg, k), k) = msg.
+
+(* Digital Signatures *)
+fun sign(bitstring, exponent): bitstring.
+reduc forall m: bitstring, k: exponent; checksign(sign(m, k), pk(k)) = m.
+
+(* Constructor for structured concatenation (Equivalent to Verifpal's CONCAT/SPLIT) *)
+fun BlobData(bitstring, bitstring, bitstring): bitstring [data].
+
+(* --- 3. EVENTS & QUERIES --- *)
+event AliceInvia(bitstring).
+event BobRiceve(bitstring).
+event CharlieRiceve(bitstring).
+
+(* Confidentiality query for the photo *)
+query attacker(photo).
+
+(* confidentiality of intermediate payload roots *)
+query attacker(new ephAES).
+query attacker(new ephMAC).
+
+(* Authentication queries for the blobSecEnc payload *)
+query m: bitstring; inj-event(BobRiceve(m)) ==> inj-event(AliceInvia(m)).
+query m: bitstring; inj-event(CharlieRiceve(m)) ==> inj-event(AliceInvia(m)).
+
+
+(* --- 4. ALICE'S PROCESS --- *)
+let Alice(aChainKey: bitstring, aSigPriv: exponent) =
+    let aSigPub = pk(aSigPriv) in
+
+    new ephAES: bitstring;
+    new ephMAC: bitstring;
+
+    let photoEnc = senc(photo, ephAES) in
+    let photoMac = mac(photoEnc, ephMAC) in
+    
+    (* Using the [data] constructor to securely bundle the elements *)
+    let blobSec = BlobData(ephAES, ephMAC, photoMac) in
+
+    (* KDF to derive the next chain key and the current message key *)
+    let kdfInput = mac(aChainKey, nil) in
+    let chainKey2 = hkdf_ck(kdfInput, nil) in
+    let messageKey = hkdf_mk(kdfInput, nil) in
+
+    let blobSecEnc = senc(blobSec, messageKey) in
+    let blobSecSigned = sign(blobSecEnc, aSigPriv) in
+
+    event AliceInvia(blobSecEnc);
+    out(c, (aSigPub, blobSecEnc, blobSecSigned, photoEnc));
+
+    (* --- PHASE 1: COMPROMISE FOR SYMMETRIC RATCHET FORWARD SECRECY --- *)
+    phase 1;
+    out(c, chainKey2);
+    0.
+
+(* --- 5. BOB'S PROCESS --- *)
+let Bob(aChainKey: bitstring, aSigPub: G) =
+    in(c, (=aSigPub, blobSecEnc: bitstring, blobSecSigned: bitstring, photoEnc: bitstring)) [precise];
+
+    let kdfInput = mac(aChainKey, nil) in
+    let chainKey2 = hkdf_ck(kdfInput, nil) in
+    let messageKey = hkdf_mk(kdfInput, nil) in
+
+    if checksign(blobSecSigned, aSigPub) = blobSecEnc then
+    
+    (* Splitting the blob securely via pattern matching on the constructor *)
+    let BlobData(ephAES, ephMAC, photoMac) = sdec(blobSecEnc, messageKey) in
+    
+    if mac(photoEnc, ephMAC) = photoMac then
+    let photoDec = sdec(photoEnc, ephAES) in
+
+    event BobRiceve(blobSecEnc);
+    0.
+
+(* --- 6. CHARLIE'S PROCESS --- *)
+let Charlie(aChainKey: bitstring, aSigPub: G) =
+    in(c, (=aSigPub, blobSecEnc: bitstring, blobSecSigned: bitstring, photoEnc: bitstring)) [precise];
+
+    let kdfInput = mac(aChainKey, nil) in
+    let chainKey2 = hkdf_ck(kdfInput, nil) in
+    let messageKey = hkdf_mk(kdfInput, nil) in
+
+    if checksign(blobSecSigned, aSigPub) = blobSecEnc then
+    
+    let BlobData(ephAES, ephMAC, photoMac) = sdec(blobSecEnc, messageKey) in
+    
+    if mac(photoEnc, ephMAC) = photoMac then
+    let photoDec = sdec(photoEnc, ephAES) in
+
+    event CharlieRiceve(blobSecEnc);
+    0.
+
+(* --- 7. ENTRY POINT (MAIN) --- *)
+process
+    (* aChainKey is a symmetric key for the ratchet, not an exponent *)
+    new aChainKey: bitstring;
+    new aSigPriv: exponent;
+    let aSigPub = pk(aSigPriv) in
+
+    ( (! Alice(aChainKey, aSigPriv)) | (! Bob(aChainKey, aSigPub)) | (! Charlie(aChainKey, aSigPub)) )
