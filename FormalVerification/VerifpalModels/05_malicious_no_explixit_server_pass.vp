@@ -1,0 +1,32 @@
+attacker[active]
+
+principal Alice[
+	knows private aChainKey
+	knows private aSigPriv
+	aSigPub = G^aSigPriv
+]
+
+principal Bob[
+	knows private aChainKey
+]
+
+principal Alice[
+	generates post
+	chainKey2, messageKey = HKDF(MAC(aChainKey, nil), nil, nil)
+	postEnc = ENC(messageKey, post)
+	postSigned = SIGN(aSigPriv, postEnc)
+]
+
+Alice -> Bob: [aSigPub], postEnc, postSigned
+
+principal Bob[
+	_ = SIGNVERIF(aSigPub, postEnc, postSigned)?
+	chainKey2B, messageKeyB = HKDF(MAC(aChainKey, nil), nil, nil)
+	postDec = DEC(messageKeyB, postEnc)
+]
+
+queries[
+	confidentiality? post
+	authentication? Alice -> Bob: postEnc
+]
+
