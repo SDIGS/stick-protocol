@@ -1,0 +1,158 @@
+(* Author: Diego Bertola, CORRETTO IN FASE DI AUDIT *)
+(* ====================================================================
+   STICK PROTOCOL - 02_STICKY_SESSION (FIXED)
+   ==================================================================== *)
+
+(* --- 1. INFRASTRUCTURE AND TYPES --- *)
+free c: channel.
+
+(* This is the ultimate secret we want to protect *)
+free photo: bitstring [private].
+
+type exponent.
+type G.
+type counter. 
+
+(* Global constant to represent Verifpal's "nil" parameters *)
+const nil: bitstring.
+
+const g: G.
+fun pk(exponent): G.
+
+(* --- 2. CRYPTOGRAPHIC PRIMITIVES --- *)
+
+(* MAC *)
+fun mac(bitstring, bitstring): bitstring.
+
+(* HKDF *)
+fun hkdf_ck(bitstring, bitstring): bitstring.
+fun hkdf_mk(bitstring, bitstring): bitstring.
+
+(* Symmetric Encryption *)
+fun senc(bitstring, bitstring): bitstring.
+reduc forall msg: bitstring, k: bitstring; sdec(senc(msg, k), k) = msg.
+
+(* Digital Signatures *)
+fun sign(bitstring, exponent): bitstring.
+reduc forall m: bitstring, k: exponent; checksign(sign(m, k), pk(k)) = m.
+
+(* Ogni destinatario tiene il proprio stato locale di replay-detection,
+   indipendente dagli altri membri del gruppo (coerente con la realtà:
+   ogni device ha il proprio DB locale) *)
+free mutex_lock_bob: channel [private].
+free mutex_lock_charlie: channel [private].
+table seen_counters_bob(counter).
+table seen_counters_charlie(counter).
+
+(* Constructor for structured concatenation *)
+fun BlobData(bitstring, bitstring, bitstring, counter): bitstring [data].
+
+(* --- 3. EVENTS & QUERIES --- *)
+event AliceInvia(bitstring, counter).
+event BobRiceve(bitstring, counter).
+event CharlieRiceve(bitstring, counter).
+
+(* Confidentiality query for the photo *)
+query attacker(photo).
+
+(* confidentiality of intermediate payload roots *)
+query attacker(new ephAES).
+query attacker(new ephMAC).
+
+query p: bitstring, c: counter; inj-event(BobRiceve(p, c)) ==> inj-event(AliceInvia(p, c)).
+query p: bitstring, c: counter; inj-event(CharlieRiceve(p, c)) ==> inj-event(AliceInvia(p, c)).
+
+
+(* --- 4. ALICE'S PROCESS --- *)
+let Alice(aChainKey: bitstring, aSigPriv: exponent) =
+    let aSigPub = pk(aSigPriv) in
+
+    new ephAES: bitstring;
+    new ephMAC: bitstring;
+    new msgCounter: counter; (* Simula l'iteratore del Sender Key Protocol *)
+
+    let photoEnc = senc(photo, ephAES) in
+    let photoMac = mac(photoEnc, ephMAC) in
+    
+    (* Il counter viene firmato indirettamente inserendolo nel blobSec *)
+    let blobSec = BlobData(ephAES, ephMAC, photoMac, msgCounter) in
+
+    (* KDF to derive the next chain key and the current message key *)
+    let kdfInput = mac(aChainKey, nil) in
+    let chainKey2 = hkdf_ck(kdfInput, nil) in
+    let messageKey = hkdf_mk(kdfInput, nil) in
+
+    let blobSecEnc = senc(blobSec, messageKey) in
+    let blobSecSigned = sign(blobSecEnc, aSigPriv) in
+
+    event AliceInvia(photo, msgCounter);
+    out(c, (aSigPub, blobSecEnc, blobSecSigned, photoEnc));
+
+    (* --- PHASE 1: COMPROMISE FOR SYMMETRIC RATCHET FORWARD SECRECY --- *)
+    phase 1;
+    out(c, chainKey2);
+    0.
+
+(* --- 5. BOB'S PROCESS --- *)
+let Bob(aChainKey: bitstring, aSigPub: G) =
+    in(c, (=aSigPub, blobSecEnc: bitstring, blobSecSigned: bitstring, photoEnc: bitstring)) [precise];
+
+    let kdfInput = mac(aChainKey, nil) in
+    let chainKey2 = hkdf_ck(kdfInput, nil) in
+    let messageKey = hkdf_mk(kdfInput, nil) in
+
+    if checksign(blobSecSigned, aSigPub) = blobSecEnc then
+    
+    (* Estrazione del counter *)
+    let BlobData(ephAES, ephMAC, photoMac, msgCounter) = sdec(blobSecEnc, messageKey) in
+    
+    if mac(photoEnc, ephMAC) = photoMac then
+    let photoDec = sdec(photoEnc, ephAES) in
+
+    in(mutex_lock_bob, token: bitstring);
+    get seen_counters_bob(=msgCounter) in
+        out(mutex_lock_bob, token);
+        0
+    else
+        insert seen_counters_bob(msgCounter);
+        out(mutex_lock_bob, token);
+        event BobRiceve(photoDec, msgCounter);
+    0.
+
+(* --- 6. CHARLIE'S PROCESS --- *)
+let Charlie(aChainKey: bitstring, aSigPub: G) =
+    in(c, (=aSigPub, blobSecEnc: bitstring, blobSecSigned: bitstring, photoEnc: bitstring)) [precise];
+
+    let kdfInput = mac(aChainKey, nil) in
+    let chainKey2 = hkdf_ck(kdfInput, nil) in
+    let messageKey = hkdf_mk(kdfInput, nil) in
+
+    if checksign(blobSecSigned, aSigPub) = blobSecEnc then
+    
+    let BlobData(ephAES, ephMAC, photoMac, msgCounter) = sdec(blobSecEnc, messageKey) in
+    
+    if mac(photoEnc, ephMAC) = photoMac then
+    let photoDec = sdec(photoEnc, ephAES) in
+
+    in(mutex_lock_charlie, token: bitstring);
+    get seen_counters_charlie(=msgCounter) in
+        out(mutex_lock_charlie, token);
+        0
+    else
+        insert seen_counters_charlie(msgCounter);
+        out(mutex_lock_charlie, token);
+        event CharlieRiceve(photoDec, msgCounter);
+    0.
+
+(* --- 7. ENTRY POINT (MAIN) --- *)
+process
+    new aChainKey: bitstring;
+    new aSigPriv: exponent;
+    let aSigPub = pk(aSigPriv) in
+    out(c, aSigPub);
+
+    (* Inizializza i Mutex per impedire le race condition, uno per destinatario *)
+    out(mutex_lock_bob, nil);
+    out(mutex_lock_charlie, nil);
+
+    ( (! Alice(aChainKey, aSigPriv)) | (! Bob(aChainKey, aSigPub)) | (! Charlie(aChainKey, aSigPub)) )
