@@ -1,0 +1,106 @@
+(* Author: Diego Bertola *)
+(* ====================================================================
+   STICK PROTOCOL - 03_RE-ESTABLISH
+   ==================================================================== *)
+
+(* --- 1. INFRASTRUCTURE AND TYPES --- *)
+
+free c: channel.
+
+type exponent.
+type G.
+
+free ikPriv: exponent [private].
+free spkPriv: exponent [private].
+free opkPriv: exponent [private].
+free alicePass: bitstring [private].
+free alicePass2: bitstring [private].
+
+const g: G.
+
+
+(* --- 2. CRYPTOGRAPHIC PRIMITIVES --- *)
+
+fun pk(exponent): G.
+
+(* Funzione di Hash crittografico *)
+fun pw_hash(bitstring): bitstring.
+
+fun senc(bitstring, bitstring): bitstring.
+
+reduc forall msg: bitstring, key: bitstring; 
+    sdec(senc(msg, key), key) = msg.
+
+fun exp2b(exponent): bitstring.
+reduc forall x: exponent; b2exp(exp2b(x)) = x.
+
+(* alicePass/alicePass2 sono password umane, non segreti ad alta entropia:
+   testiamo anche il guessing attack offline, non solo la derivazione diretta *)
+weaksecret alicePass.
+weaksecret alicePass2.
+
+
+(* --- EVENTS AND QUERIES --- *)
+event Device1Uploads(exponent).
+event Device2Downloads(exponent).
+
+query attacker(ikPriv).
+query attacker(spkPriv).
+query attacker(opkPriv).
+query attacker(alicePass).
+query attacker(alicePass2).
+
+query k: exponent; inj-event(Device2Downloads(k)) ==> inj-event(Device1Uploads(k)).
+
+
+(* --- DEVICE 1 PROCESS --- *)
+let Device1(ikPriv: exponent, spkPriv: exponent, opkPriv: exponent, alicePass: bitstring, alicePass2: bitstring) =
+    let ikPub = pk(ikPriv) in
+    let spkPub = pk(spkPriv) in
+    let opkPub = pk(opkPriv) in
+
+    let secretKeyD1 = pw_hash(alicePass) in
+    let hashedPassD1 = pw_hash(alicePass2) in
+
+    let ikPrivEnc = senc(exp2b(ikPriv), secretKeyD1) in
+    let spkPrivEnc = senc(exp2b(spkPriv), secretKeyD1) in
+    let opkPrivEnc = senc(exp2b(opkPriv), secretKeyD1) in
+
+    event Device1Uploads(ikPriv);
+    out(c, (hashedPassD1, ikPrivEnc, ikPub, spkPrivEnc, spkPub, opkPrivEnc, opkPub));
+    0.
+
+
+(* --- DEVICE 2 PROCESS --- *)
+let Device2(alicePass: bitstring, alicePass2: bitstring) =
+    let hashedPassD2 = pw_hash(alicePass2) in
+    
+    out(c, hashedPassD2);
+    
+    in(c, (ikPrivEnc: bitstring, ikPub: G, spkPrivEnc: bitstring, spkPub: G, opkPrivEnc: bitstring, opkPub: G));
+    
+    let secretKeyD2 = pw_hash(alicePass) in
+    let ikPrivDec = b2exp(sdec(ikPrivEnc, secretKeyD2)) in
+    let spkPrivDec = b2exp(sdec(spkPrivEnc, secretKeyD2)) in
+    let opkPrivDec = b2exp(sdec(opkPrivEnc, secretKeyD2)) in
+    
+    event Device2Downloads(ikPrivDec);
+    0.
+
+ 
+(* --- SERVER PROCESS --- *)
+let Server() =
+    in(c, (hashedPassD1: bitstring, ikPrivEnc: bitstring, ikPub: G, spkPrivEnc: bitstring, spkPub: G, opkPrivEnc: bitstring, opkPub: G));
+
+    let doubleHashedPass = pw_hash(hashedPassD1) in
+
+    in(c, hashedPassD2: bitstring);
+   
+    if doubleHashedPass = pw_hash(hashedPassD2) then
+    out(c, (ikPrivEnc, ikPub, spkPrivEnc, spkPub, opkPrivEnc, opkPub));
+    0.
+
+
+(* --- ENTRY POINT (MAIN) --- *)
+process
+    ( (! Device1(ikPriv, spkPriv, opkPriv, alicePass, alicePass2)) | (! Device2(alicePass, alicePass2)) | (! Server()) )
