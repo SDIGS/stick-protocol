@@ -1,0 +1,161 @@
+(* Author: Diego Bertola *)
+(* ====================================================================
+   STICK PROTOCOL - 01_PAIRWISE_SESSION
+   ==================================================================== *)
+
+(* --- 1. INFRASTRUCTURE AND TYPES --- *)
+free c: channel.
+
+(* Our "msg1". We declare it global and [private] for the confidentiality query *)
+free secret_msg: bitstring [private]. 
+
+type exponent.
+type G.
+
+const nil: bitstring.
+
+free aIkPriv: exponent [private].
+free bIkPriv: exponent [private].
+free bSpkPriv: exponent [private].
+
+(* Pruning optimization: The attacker cannot know long-term keys in phase 0 *)
+not attacker(aIkPriv) phase 0.
+not attacker(bIkPriv) phase 0.
+not attacker(bSpkPriv) phase 0.
+
+(* Heuristic guidance: prevent infinite unifications on Diffie-Hellman *)
+nounif x: exponent, y: G; attacker(dh(y, x)) / -5000.
+
+(* --- 2. DIFFIE-HELLMAN --- *)
+const g: G.
+fun pk(exponent): G.
+fun dh(G, exponent): G.
+equation forall x: exponent, y: exponent; 
+    dh(pk(x), y) = dh(pk(y), x).
+
+(* Cast function to serialize a G point into bytes *)
+fun G2B(G): bitstring.
+
+(* --- 3. CRYPTOGRAPHIC PRIMITIVES --- *)
+
+(* Signatures: Faithful to X3DH, signs ONLY the Signed PreKey (SPK) *)
+fun sign(G, exponent): bitstring. 
+reduc forall m: G, k: exponent; checksign(sign(m, k), pk(k)) = m.
+
+(* Constructor to structure the public bundle strictly *)
+fun Bundle(bitstring, G, G): bitstring [data].
+
+(* Hash Functions *)
+fun hash4(bitstring, bitstring, bitstring, bitstring): bitstring.
+fun hash3(bitstring, bitstring, bitstring): bitstring.
+fun mac(bitstring, bitstring): bitstring.
+
+(* HKDF *)
+fun hkdf_rk(bitstring, bitstring): bitstring.
+fun hkdf_ck(bitstring, bitstring): bitstring.
+
+(* AEAD (Authenticated Encryption with Associated Data) *)
+fun aead_enc(bitstring, bitstring, bitstring): bitstring. 
+reduc forall k: bitstring, msg: bitstring, ad: bitstring; 
+    aead_dec(k, aead_enc(k, msg, ad), ad) = msg.
+
+(* --- 4. EVENTS AND QUERIES --- *)
+event AliceInvia(G, bitstring).
+event BobRiceve(G, bitstring).
+
+(* confidentiality? msg1 *)
+query attacker(secret_msg).
+
+(* authentication? Alice -> Bob: msg1Enc *)
+query m: bitstring; inj-event(BobRiceve(pk(aIkPriv), m)) ==> inj-event(AliceInvia(pk(aIkPriv), m)).
+
+(* --- 5. ALICE'S PROCESS --- *)
+let Alice(aIkPriv: exponent, bIkPub: G) =
+    let aIkPub = pk(aIkPriv) in
+    
+    in(c, (=bIkPub, Bundle(bSig: bitstring, bSpkPub: G, bOpkPub: G))) [precise];
+    
+    (* Vulnerability: Alice verifies only bSpkPub. The OPK is completely unauthenticated *)
+    if checksign(bSig, bIkPub) = bSpkPub then
+    
+    new aEk1Priv: exponent;
+    let aEk1Pub = pk(aEk1Priv) in
+    
+    let dh1 = dh(bSpkPub, aIkPriv) in
+    let dh2 = dh(bIkPub, aEk1Priv) in
+    let dh3 = dh(bSpkPub, aEk1Priv) in
+    let dh4 = dh(bOpkPub, aEk1Priv) in
+    
+    let aMasterSec = hash4(G2B(dh1), G2B(dh2), G2B(dh3), G2B(dh4)) in
+    let aRK1 = hkdf_rk(aMasterSec, nil) in
+    let aCkBA1 = hkdf_ck(aMasterSec, nil) in
+    
+    new aEk2Priv: exponent;
+    let aEk2Pub = pk(aEk2Priv) in
+    let aDH1 = dh(bSpkPub, aEk2Priv) in
+    
+    let aRK2 = hkdf_rk(G2B(aDH1), aRK1) in
+    let aCkAB1 = hkdf_ck(G2B(aDH1), aRK1) in
+    
+    let mac_out = mac(aCkAB1, nil) in
+    let aCkAB2 = hkdf_rk(mac_out, nil) in
+    let aMk1 = hkdf_ck(mac_out, nil) in
+    
+    let ad = hash3(G2B(aIkPub), G2B(bIkPub), G2B(aEk2Pub)) in
+    let msg1Enc = aead_enc(aMk1, secret_msg, ad) in
+    
+    event AliceInvia(aIkPub, msg1Enc);
+    out(c, (aIkPub, aEk1Pub, aEk2Pub, msg1Enc));
+    
+    (* --- PHASE 1: COMPROMISE FOR FORWARD SECRECY --- *)
+    phase 1;
+    out(c, aIkPriv);
+    0.
+
+(* --- 6. BOB'S PROCESS --- *)
+let Bob(bIkPriv: exponent, bSpkPriv: exponent, bOpkPriv: exponent, aIkPub: G) =
+    let bIkPub = pk(bIkPriv) in
+    let bSpkPub = pk(bSpkPriv) in
+    let bOpkPub = pk(bOpkPriv) in
+    
+    let bSig = sign(bSpkPub, bIkPriv) in
+    out(c, (bIkPub, Bundle(bSig, bSpkPub, bOpkPub)));
+    
+    in(c, (=aIkPub, aEk1Pub: G, aEk2Pub: G, msg1Enc: bitstring)) [precise];
+    
+    let b_dh1 = dh(aIkPub, bSpkPriv) in
+    let b_dh2 = dh(aEk1Pub, bIkPriv) in
+    let b_dh3 = dh(aEk1Pub, bSpkPriv) in
+    let b_dh4 = dh(aEk1Pub, bOpkPriv) in
+    
+    let bMaster = hash4(G2B(b_dh1), G2B(b_dh2), G2B(b_dh3), G2B(b_dh4)) in
+    let bRK1 = hkdf_rk(bMaster, nil) in
+    
+    let bDH1 = dh(aEk2Pub, bSpkPriv) in
+    let bRK2 = hkdf_rk(G2B(bDH1), bRK1) in
+    let bCkAB1 = hkdf_ck(G2B(bDH1), bRK1) in
+    
+    let b_mac_out = mac(bCkAB1, nil) in
+    let bCkAB2 = hkdf_rk(b_mac_out, nil) in
+    let bMk1 = hkdf_ck(b_mac_out, nil) in
+    
+    let ad = hash3(G2B(aIkPub), G2B(bIkPub), G2B(aEk2Pub)) in
+    let msg1Dec = aead_dec(bMk1, msg1Enc, ad) in
+    
+    event BobRiceve(aIkPub, msg1Enc);
+    
+    (* --- PHASE 1: COMPROMISE FOR FORWARD SECRECY --- *)
+    phase 1;
+    out(c, bIkPriv); 
+    out(c, bSpkPriv);
+    0.
+
+(* --- 7. ENTRY POINT (MAIN) --- *)
+process
+    let aIkPub = pk(aIkPriv) in
+    
+    let bIkPub = pk(bIkPriv) in
+    new bOpkPriv: exponent;
+    
+    ( Alice(aIkPriv, bIkPub) | Bob(bIkPriv, bSpkPriv, bOpkPriv, aIkPub) )
+
