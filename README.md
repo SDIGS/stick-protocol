@@ -120,3 +120,5 @@ Tests 01->04 are expected to pass, while test 05 is expected to fail.
 Copyright © 2018-2024 <a href="https://www.sticknet.org">Sticknet</a>
 
 Licensed under the GPLv3: http://www.gnu.org/licenses/gpl-3.0.html
+
+See [NOTICE.md](NOTICE.md) for attribution of the formal-verification work added in this fork.
