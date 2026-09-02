@@ -7,8 +7,9 @@ GNU General Public License v3.0 (see [LICENSE](LICENSE)).
 ## Additions in this fork
 
 The following are original contributions by Diego Bertola, Copyright © 2026,
-developed as part of a bachelor's thesis on formal verification and security
-auditing of the Stick Protocol (University of Turin, supervisor: Prof. Idilio Drago).
+modified/added starting September 2026, developed as part of a bachelor's thesis
+on formal verification and security auditing of the Stick Protocol (University of
+Turin — supervisor: Prof. Idilio Drago, co-supervisor: Prof. Ugo de' Liguoro).
 Licensed under the same GNU General Public License v3.0 as the rest of the project.
 
 - `FormalVerification/ProVerifModels/` — ProVerif models translating and extending
@@ -19,5 +20,6 @@ Licensed under the same GNU General Public License v3.0 as the rest of the proje
   Verifpal model for the malicious-server / key-substitution scenario.
 
 Further audit documentation (correctness notes, cross-checks against the real
-Java/Android implementation) is maintained separately as part of the thesis and is
-not included in this repository.
+Java/Android implementation) is currently kept separately as part of the thesis
+workflow; it will be integrated into this repository at a later stage, once the
+thesis write-up consolidates.
