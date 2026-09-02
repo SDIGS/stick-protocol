@@ -1,0 +1,88 @@
+(* Author: Diego Bertola *)
+(* ====================================================================
+   STICK PROTOCOL - 02_STICKY_SESSION
+   ==================================================================== *)
+
+(* --- 1. INFRASTRUCTURE AND TYPES --- *)
+free c: channel.
+
+(* This is the ultimate secret we want to protect *)
+free post: bitstring [private].
+
+type exponent.
+type G.
+
+(* Global constant to represent Verifpal's "nil" parameters *)
+const nil: bitstring.
+
+const g: G.
+
+(* --- 2. CRYPTOGRAPHIC PRIMITIVES --- *)
+fun pk(exponent): G.
+
+(* MAC *)
+fun mac(bitstring, bitstring): bitstring.
+
+(* HKDF (Split into two functions to represent the two outputs: chainKey and messageKey) *)
+fun hkdf_ck(bitstring, bitstring): bitstring.
+fun hkdf_mk(bitstring, bitstring): bitstring.
+
+(* Symmetric Encryption *)
+fun senc(bitstring, bitstring): bitstring.
+reduc forall msg: bitstring, k: bitstring; sdec(senc(msg, k), k) = msg.
+
+(* Digital Signatures *)
+fun sign(bitstring, exponent): bitstring.
+reduc forall m: bitstring, k: exponent; checksign(sign(m, k), pk(k)) = m.
+
+
+(* --- 3. EVENTS & QUERIES --- *)
+event AliceInvia(bitstring).
+event BobRiceve(bitstring).
+
+(* Confidentiality query for the post *)
+query attacker(post).
+
+(* Authentication queries for the post *)
+query m: bitstring; inj-event(BobRiceve(post)) ==> inj-event(AliceInvia(post)).
+
+
+(* --- 4. ALICE'S PROCESS --- *)
+let Alice(aChainKey: bitstring, aSigPriv: exponent) =
+    let aSigPub = pk(aSigPriv) in
+
+    (* KDF to derive the next chain key and the current message key *)
+    let kdfInput = mac(aChainKey, nil) in
+    let chainKey2 = hkdf_ck(kdfInput, nil) in
+    let messageKey = hkdf_mk(kdfInput, nil) in
+   
+    let postEnc = senc(post, messageKey) in
+    let postSigned = sign(postEnc, aSigPriv) in   
+ 
+    event AliceInvia(post);
+    out(c, (aSigPub, postEnc, postSigned));
+    0.
+
+
+(* --- 5. BOB'S PROCESS --- *)
+let Bob(aChainKey: bitstring) =
+    in(c, (aSigPub: G, postEnc: bitstring, postSigned: bitstring));
+
+    if checksign(postSigned, aSigPub) = postEnc then
+
+    let kdfInput = mac(aChainKey, nil) in
+    let chainKey2 = hkdf_ck(kdfInput, nil) in
+    let messageKey = hkdf_mk(kdfInput, nil) in
+
+    let postDec = sdec(postEnc, messageKey) in
+
+    event BobRiceve(postDec);
+    0.
+
+
+(* --- 6. ENTRY POINT (MAIN) --- *)
+process
+    new aChainKey: bitstring;
+    new aSigPriv: exponent;
+
+    ( !Alice(aChainKey, aSigPriv) | !Bob(aChainKey) )
