@@ -1,0 +1,305 @@
+Process 0 (that is, the initial process):
+(
+    {1}let ikPriv_1: exponent = ikPriv in
+    {2}let spkPriv_1: exponent = spkPriv in
+    {3}let opkPriv_1: exponent = opkPriv in
+    {4}let alicePass_1: bitstring = alicePass in
+    {5}let alicePass2_1: bitstring = alicePass2 in
+    {6}let ikPub: G = pk(ikPriv_1) in
+    {7}let spkPub: G = pk(spkPriv_1) in
+    {8}let opkPub: G = pk(opkPriv_1) in
+    {9}let secretKeyD1: bitstring = pw_hash(alicePass_1) in
+    {10}let hashedPassD1: bitstring = pw_hash(alicePass2_1) in
+    {11}let ikPrivEnc: bitstring = senc(exp2b(ikPriv_1),secretKeyD1) in
+    {12}let spkPrivEnc: bitstring = senc(exp2b(spkPriv_1),secretKeyD1) in
+    {13}let opkPrivEnc: bitstring = senc(exp2b(opkPriv_1),secretKeyD1) in
+    {14}event Device1Uploads(ikPriv_1);
+    {15}out(c, (hashedPassD1,ikPrivEnc,ikPub,spkPrivEnc,spkPub,opkPrivEnc,opkPub))
+) | (
+    {16}let alicePass_2: bitstring = alicePass in
+    {17}let alicePass2_2: bitstring = alicePass2 in
+    {18}let hashedPassD2: bitstring = pw_hash(alicePass2_2) in
+    {19}out(c, hashedPassD2);
+    {20}in(c, (ikPrivEnc_1: bitstring,ikPub_1: G,spkPrivEnc_1: bitstring,spkPub_1: G,opkPrivEnc_1: bitstring,opkPub_1: G));
+    {21}let secretKeyD2: bitstring = pw_hash(alicePass_2) in
+    {22}let ikPrivDec: exponent = b2exp(sdec(ikPrivEnc_1,secretKeyD2)) in
+    {23}let spkPrivDec: exponent = b2exp(sdec(spkPrivEnc_1,secretKeyD2)) in
+    {24}let opkPrivDec: exponent = b2exp(sdec(opkPrivEnc_1,secretKeyD2)) in
+    {25}event Device2Downloads(ikPrivDec)
+) | (
+    {26}in(c, (hashedPassD1_1: bitstring,ikPrivEnc_2: bitstring,ikPub_2: G,spkPrivEnc_2: bitstring,spkPub_2: G,opkPrivEnc_2: bitstring,opkPub_2: G));
+    {27}let doubleHashedPass: bitstring = pw_hash(hashedPassD1_1) in
+    {28}in(c, hashedPassD2_1: bitstring);
+    {29}if (doubleHashedPass = pw_hash(hashedPassD2_1)) then
+    {30}out(c, (ikPrivEnc_2,ikPub_2,spkPrivEnc_2,spkPub_2,opkPrivEnc_2,opkPub_2))
+)
+
+--  Process 1 (that is, process 0, with let moved downwards):
+(
+    {1}let ikPriv_1: exponent = ikPriv in
+    {14}event Device1Uploads(ikPriv_1);
+    {4}let alicePass_1: bitstring = alicePass in
+    {9}let secretKeyD1: bitstring = pw_hash(alicePass_1) in
+    {3}let opkPriv_1: exponent = opkPriv in
+    {13}let opkPrivEnc: bitstring = senc(exp2b(opkPriv_1),secretKeyD1) in
+    {2}let spkPriv_1: exponent = spkPriv in
+    {12}let spkPrivEnc: bitstring = senc(exp2b(spkPriv_1),secretKeyD1) in
+    {11}let ikPrivEnc: bitstring = senc(exp2b(ikPriv_1),secretKeyD1) in
+    {5}let alicePass2_1: bitstring = alicePass2 in
+    {10}let hashedPassD1: bitstring = pw_hash(alicePass2_1) in
+    {8}let opkPub: G = pk(opkPriv_1) in
+    {7}let spkPub: G = pk(spkPriv_1) in
+    {6}let ikPub: G = pk(ikPriv_1) in
+    {15}out(c, (hashedPassD1,ikPrivEnc,ikPub,spkPrivEnc,spkPub,opkPrivEnc,opkPub))
+) | (
+    {17}let alicePass2_2: bitstring = alicePass2 in
+    {18}let hashedPassD2: bitstring = pw_hash(alicePass2_2) in
+    {19}out(c, hashedPassD2);
+    {20}in(c, (ikPrivEnc_1: bitstring,ikPub_1: G,spkPrivEnc_1: bitstring,spkPub_1: G,opkPrivEnc_1: bitstring,opkPub_1: G));
+    {16}let alicePass_2: bitstring = alicePass in
+    {21}let secretKeyD2: bitstring = pw_hash(alicePass_2) in
+    {22}let ikPrivDec: exponent = b2exp(sdec(ikPrivEnc_1,secretKeyD2)) in
+    {23}let spkPrivDec: exponent = b2exp(sdec(spkPrivEnc_1,secretKeyD2)) in
+    {24}let opkPrivDec: exponent = b2exp(sdec(opkPrivEnc_1,secretKeyD2)) in
+    {25}event Device2Downloads(ikPrivDec)
+) | (
+    {26}in(c, (hashedPassD1_1: bitstring,ikPrivEnc_2: bitstring,ikPub_2: G,spkPrivEnc_2: bitstring,spkPub_2: G,opkPrivEnc_2: bitstring,opkPub_2: G));
+    {28}in(c, hashedPassD2_1: bitstring);
+    {27}let doubleHashedPass: bitstring = pw_hash(hashedPassD1_1) in
+    {29}if (doubleHashedPass = pw_hash(hashedPassD2_1)) then
+    {30}out(c, (ikPrivEnc_2,ikPub_2,spkPrivEnc_2,spkPub_2,opkPrivEnc_2,opkPub_2))
+)
+
+-- Weak secret alicePass in process 1.
+Translating the process into Horn clauses...
+Termination warning: v ≠ v_1 && attacker_guess(v_2,v) && attacker_guess(v_2,v_1) -> bad
+Selecting 0
+Termination warning: v ≠ v_1 && attacker_guess(v,v_2) && attacker_guess(v_1,v_2) -> bad
+Selecting 0
+Completing...
+Termination warning: v ≠ v_1 && attacker_guess(v_2,v) && attacker_guess(v_2,v_1) -> bad
+Selecting 0
+Termination warning: v ≠ v_1 && attacker_guess(v,v_2) && attacker_guess(v_1,v_2) -> bad
+Selecting 0
+Termination warning: v ≠ v_1 && attacker(v) && attacker_guess(v,v_1) -> bad
+Selecting 1
+Termination warning: v ≠ v_1 && attacker(v) && attacker_guess(v_1,v) -> bad
+Selecting 1
+goal reachable: bad
+
+Derivation:
+
+1. The attacker has the weak secret alicePass[] in the first component, a guess @weaksecretcst in the second.
+attacker_guess(alicePass[],@weaksecretcst).
+
+2. By 1, the attacker may know alicePass[] (resp. @weaksecretcst) in off-line phase.
+Using the function pw_hash the attacker may obtain pw_hash(alicePass[]) (resp. pw_hash(@weaksecretcst)) in off-line phase.
+attacker_guess(pw_hash(alicePass[]),pw_hash(@weaksecretcst)).
+
+3. The message (pw_hash(alicePass2[]),senc(exp2b(ikPriv[]),pw_hash(alicePass[])),pk(ikPriv[]),senc(exp2b(spkPriv[]),pw_hash(alicePass[])),pk(spkPriv[]),senc(exp2b(opkPriv[]),pw_hash(alicePass[])),pk(opkPriv[])) may be sent to the attacker at output {15}.
+attacker((pw_hash(alicePass2[]),senc(exp2b(ikPriv[]),pw_hash(alicePass[])),pk(ikPriv[]),senc(exp2b(spkPriv[]),pw_hash(alicePass[])),pk(spkPriv[]),senc(exp2b(opkPriv[]),pw_hash(alicePass[])),pk(opkPriv[]))).
+
+4. By 3, the attacker may know (pw_hash(alicePass2[]),senc(exp2b(ikPriv[]),pw_hash(alicePass[])),pk(ikPriv[]),senc(exp2b(spkPriv[]),pw_hash(alicePass[])),pk(spkPriv[]),senc(exp2b(opkPriv[]),pw_hash(alicePass[])),pk(opkPriv[])).
+Using the function 6-proj-7-tuple the attacker may obtain senc(exp2b(opkPriv[]),pw_hash(alicePass[])).
+attacker(senc(exp2b(opkPriv[]),pw_hash(alicePass[]))).
+
+5. By 4, the attacker may know senc(exp2b(opkPriv[]),pw_hash(alicePass[])).
+So the attacker may know senc(exp2b(opkPriv[]),pw_hash(alicePass[])) (resp. senc(exp2b(opkPriv[]),pw_hash(alicePass[]))) in off-line phase.
+attacker_guess(senc(exp2b(opkPriv[]),pw_hash(alicePass[])),senc(exp2b(opkPriv[]),pw_hash(alicePass[]))).
+
+6. By 5, the attacker may know senc(exp2b(opkPriv[]),pw_hash(alicePass[])) (resp. senc(exp2b(opkPriv[]),pw_hash(alicePass[]))) in off-line phase.
+By 2, the attacker may know pw_hash(alicePass[]) (resp. pw_hash(@weaksecretcst)) in off-line phase.
+Using the function sdec the attacker may obtain exp2b(opkPriv[]) (resp. fail-any_type) in off-line phase.
+attacker_guess(exp2b(opkPriv[]),fail-any_type).
+
+7. By 6, the attacker may know exp2b(opkPriv[]) (resp. fail-any_type) in off-line phase.
+So the attacker may test the failure of this term, which may allow it to distinguish cases.
+bad.
+
+
+A more detailed output of the traces is available with
+  set traceDisplay = long.
+
+out(c, ~M) with ~M = pw_hash(alicePass2) at {19}
+
+event Device1Uploads(ikPriv) at {14}
+
+out(c, (~M_1,~M_2,~M_3,~M_4,~M_5,~M_6,~M_7)) with ~M_1 = pw_hash(alicePass2), ~M_2 = senc(exp2b(ikPriv),pw_hash(alicePass)), ~M_3 = pk(ikPriv), ~M_4 = senc(exp2b(spkPriv),pw_hash(alicePass)), ~M_5 = pk(spkPriv), ~M_6 = senc(exp2b(opkPriv),pw_hash(alicePass)), ~M_7 = pk(opkPriv) at {15}
+
+The attacker tests whether sdec(~M_6,pw_hash(@weaksecretcst)) is fail knowing
+~M_6 = senc(exp2b(opkPriv),pw_hash(alicePass)).
+This allows the attacker to know whether @weaksecretcst = alicePass.
+A trace has been found.
+RESULT Weak secret alicePass is false.
+-- Weak secret alicePass2 in process 1.
+Translating the process into Horn clauses...
+Termination warning: v ≠ v_1 && attacker_guess(v_2,v) && attacker_guess(v_2,v_1) -> bad
+Selecting 0
+Termination warning: v ≠ v_1 && attacker_guess(v,v_2) && attacker_guess(v_1,v_2) -> bad
+Selecting 0
+Completing...
+Termination warning: v ≠ v_1 && attacker_guess(v_2,v) && attacker_guess(v_2,v_1) -> bad
+Selecting 0
+Termination warning: v ≠ v_1 && attacker_guess(v,v_2) && attacker_guess(v_1,v_2) -> bad
+Selecting 0
+Termination warning: v ≠ v_1 && attacker(v) && attacker_guess(v,v_1) -> bad
+Selecting 1
+Termination warning: v ≠ v_1 && attacker(v) && attacker_guess(v_1,v) -> bad
+Selecting 1
+goal reachable: bad
+
+Derivation:
+
+1. The attacker has the weak secret alicePass2[] in the first component, a guess @weaksecretcst in the second.
+attacker_guess(alicePass2[],@weaksecretcst).
+
+2. By 1, the attacker may know alicePass2[] (resp. @weaksecretcst) in off-line phase.
+Using the function pw_hash the attacker may obtain pw_hash(alicePass2[]) (resp. pw_hash(@weaksecretcst)) in off-line phase.
+attacker_guess(pw_hash(alicePass2[]),pw_hash(@weaksecretcst)).
+
+3. The message (pw_hash(alicePass2[]),senc(exp2b(ikPriv[]),pw_hash(alicePass[])),pk(ikPriv[]),senc(exp2b(spkPriv[]),pw_hash(alicePass[])),pk(spkPriv[]),senc(exp2b(opkPriv[]),pw_hash(alicePass[])),pk(opkPriv[])) may be sent to the attacker at output {15}.
+attacker((pw_hash(alicePass2[]),senc(exp2b(ikPriv[]),pw_hash(alicePass[])),pk(ikPriv[]),senc(exp2b(spkPriv[]),pw_hash(alicePass[])),pk(spkPriv[]),senc(exp2b(opkPriv[]),pw_hash(alicePass[])),pk(opkPriv[]))).
+
+4. By 3, the attacker may know (pw_hash(alicePass2[]),senc(exp2b(ikPriv[]),pw_hash(alicePass[])),pk(ikPriv[]),senc(exp2b(spkPriv[]),pw_hash(alicePass[])),pk(spkPriv[]),senc(exp2b(opkPriv[]),pw_hash(alicePass[])),pk(opkPriv[])).
+Using the function 1-proj-7-tuple the attacker may obtain pw_hash(alicePass2[]).
+attacker(pw_hash(alicePass2[])).
+
+5. By 4, the attacker may know pw_hash(alicePass2[]).
+So the attacker may know pw_hash(alicePass2[]) (resp. pw_hash(alicePass2[])) in off-line phase.
+attacker_guess(pw_hash(alicePass2[]),pw_hash(alicePass2[])).
+
+6. By 5, the attacker may know pw_hash(alicePass2[]) (resp. pw_hash(alicePass2[])) in off-line phase.
+By 2, the attacker may know pw_hash(alicePass2[]) (resp. pw_hash(@weaksecretcst)) in off-line phase.
+We have pw_hash(alicePass2[]) ≠ pw_hash(@weaksecretcst).
+The attacker tests equality between the two terms he knows, which may allow it to distinguish cases.
+bad.
+
+
+A more detailed output of the traces is available with
+  set traceDisplay = long.
+
+out(c, ~M) with ~M = pw_hash(alicePass2) at {19}
+
+event Device1Uploads(ikPriv) at {14}
+
+out(c, (~M_1,~M_2,~M_3,~M_4,~M_5,~M_6,~M_7)) with ~M_1 = pw_hash(alicePass2), ~M_2 = senc(exp2b(ikPriv),pw_hash(alicePass)), ~M_3 = pk(ikPriv), ~M_4 = senc(exp2b(spkPriv),pw_hash(alicePass)), ~M_5 = pk(spkPriv), ~M_6 = senc(exp2b(opkPriv),pw_hash(alicePass)), ~M_7 = pk(opkPriv) at {15}
+
+The attacker tests whether 
+~M = pw_hash(@weaksecretcst)
+knowing
+~M = pw_hash(alicePass2).
+This allows the attacker to know whether @weaksecretcst = alicePass2.
+A trace has been found.
+RESULT Weak secret alicePass2 is false.
+-- Query not attacker(ikPriv[]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker(ikPriv[])
+RESULT not attacker(ikPriv[]) is true.
+-- Query not attacker(spkPriv[]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker(spkPriv[])
+RESULT not attacker(spkPriv[]) is true.
+-- Query not attacker(opkPriv[]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker(opkPriv[])
+RESULT not attacker(opkPriv[]) is true.
+-- Query not attacker(alicePass[]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker(alicePass[])
+RESULT not attacker(alicePass[]) is true.
+-- Query not attacker(alicePass2[]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker(alicePass2[])
+RESULT not attacker(alicePass2[]) is true.
+-- Query inj-event(Device2Downloads(k)) ==> inj-event(Device1Uploads(k)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+200 rules inserted. Base: 200 rules (52 with conclusion selected). Queue: 14 rules.
+Starting query inj-event(Device2Downloads(k)) ==> inj-event(Device1Uploads(k))
+goal reachable: attacker(ikPub_3) && attacker(spkPub_3) && b-inj-event(Device1Uploads(ikPriv[]),@occ14[]) && attacker(opkPub_3) -> inj-event(Device2Downloads(opkPriv[]),@occ25_1)
+Abbreviations:
+@occ25_1 = @occ25[opkPub_1 = opkPub_3,opkPrivEnc_1 = senc(exp2b(opkPriv[]),pw_hash(alicePass[])),spkPub_1 = spkPub_3,spkPrivEnc_1 = senc(exp2b(opkPriv[]),pw_hash(alicePass[])),ikPub_1 = ikPub_3,ikPrivEnc_1 = senc(exp2b(opkPriv[]),pw_hash(alicePass[]))]
+
+Derivation:
+Abbreviations:
+@occ25_1 = @occ25[opkPub_1 = opkPub_3,opkPrivEnc_1 = senc(exp2b(opkPriv[]),pw_hash(alicePass[])),spkPub_1 = spkPub_3,spkPrivEnc_1 = senc(exp2b(opkPriv[]),pw_hash(alicePass[])),ikPub_1 = ikPub_3,ikPrivEnc_1 = senc(exp2b(opkPriv[]),pw_hash(alicePass[]))]
+
+1. We assume as hypothesis that
+attacker(opkPub_3).
+
+2. The event Device1Uploads(ikPriv[]) (with occurrence name @occ14[]) may be executed at {14}.
+So the message (pw_hash(alicePass2[]),senc(exp2b(ikPriv[]),pw_hash(alicePass[])),pk(ikPriv[]),senc(exp2b(spkPriv[]),pw_hash(alicePass[])),pk(spkPriv[]),senc(exp2b(opkPriv[]),pw_hash(alicePass[])),pk(opkPriv[])) may be sent to the attacker at output {15}.
+attacker((pw_hash(alicePass2[]),senc(exp2b(ikPriv[]),pw_hash(alicePass[])),pk(ikPriv[]),senc(exp2b(spkPriv[]),pw_hash(alicePass[])),pk(spkPriv[]),senc(exp2b(opkPriv[]),pw_hash(alicePass[])),pk(opkPriv[]))).
+
+3. By 2, the attacker may know (pw_hash(alicePass2[]),senc(exp2b(ikPriv[]),pw_hash(alicePass[])),pk(ikPriv[]),senc(exp2b(spkPriv[]),pw_hash(alicePass[])),pk(spkPriv[]),senc(exp2b(opkPriv[]),pw_hash(alicePass[])),pk(opkPriv[])).
+Using the function 6-proj-7-tuple the attacker may obtain senc(exp2b(opkPriv[]),pw_hash(alicePass[])).
+attacker(senc(exp2b(opkPriv[]),pw_hash(alicePass[]))).
+
+4. We assume as hypothesis that
+attacker(spkPub_3).
+
+5. We assume as hypothesis that
+attacker(ikPub_3).
+
+6. By 3, the attacker may know senc(exp2b(opkPriv[]),pw_hash(alicePass[])).
+By 5, the attacker may know ikPub_3.
+By 3, the attacker may know senc(exp2b(opkPriv[]),pw_hash(alicePass[])).
+By 4, the attacker may know spkPub_3.
+By 3, the attacker may know senc(exp2b(opkPriv[]),pw_hash(alicePass[])).
+By 1, the attacker may know opkPub_3.
+Using the function 6-tuple the attacker may obtain (senc(exp2b(opkPriv[]),pw_hash(alicePass[])),ikPub_3,senc(exp2b(opkPriv[]),pw_hash(alicePass[])),spkPub_3,senc(exp2b(opkPriv[]),pw_hash(alicePass[])),opkPub_3).
+attacker((senc(exp2b(opkPriv[]),pw_hash(alicePass[])),ikPub_3,senc(exp2b(opkPriv[]),pw_hash(alicePass[])),spkPub_3,senc(exp2b(opkPriv[]),pw_hash(alicePass[])),opkPub_3)).
+
+7. The message (senc(exp2b(opkPriv[]),pw_hash(alicePass[])),ikPub_3,senc(exp2b(opkPriv[]),pw_hash(alicePass[])),spkPub_3,senc(exp2b(opkPriv[]),pw_hash(alicePass[])),opkPub_3) that the attacker may have by 6 may be received at input {20}.
+So event Device2Downloads(opkPriv[]) may be executed at {25}.
+inj-event(Device2Downloads(opkPriv[]),@occ25_1).
+
+8. By 7, inj-event(Device2Downloads(opkPriv[]),@occ25_1).
+The goal is reached, represented in the following fact:
+inj-event(Device2Downloads(opkPriv[]),@occ25_1).
+
+
+A more detailed output of the traces is available with
+  set traceDisplay = long.
+
+out(c, ~M) with ~M = pw_hash(alicePass2) at {19}
+
+event Device1Uploads(ikPriv) at {14}
+
+out(c, (~M_1,~M_2,~M_3,~M_4,~M_5,~M_6,~M_7)) with ~M_1 = pw_hash(alicePass2), ~M_2 = senc(exp2b(ikPriv),pw_hash(alicePass)), ~M_3 = pk(ikPriv), ~M_4 = senc(exp2b(spkPriv),pw_hash(alicePass)), ~M_5 = pk(spkPriv), ~M_6 = senc(exp2b(opkPriv),pw_hash(alicePass)), ~M_7 = pk(opkPriv) at {15}
+
+in(c, (~M_6,a,~M_6,a_1,~M_6,a_2)) with ~M_6 = senc(exp2b(opkPriv),pw_hash(alicePass)), ~M_6 = senc(exp2b(opkPriv),pw_hash(alicePass)), ~M_6 = senc(exp2b(opkPriv),pw_hash(alicePass)) at {20}
+
+event Device2Downloads(opkPriv) at {25} (goal)
+
+The event Device2Downloads(opkPriv) is executed at {25}.
+A trace has been found.
+RESULT inj-event(Device2Downloads(k)) ==> inj-event(Device1Uploads(k)) is false.
+RESULT (even event(Device2Downloads(k)) ==> event(Device1Uploads(k)) is false.)
+
+--------------------------------------------------------------
+Verification summary:
+
+Weak secret alicePass is false.
+
+Weak secret alicePass2 is false.
+
+Query not attacker(ikPriv[]) is true.
+
+Query not attacker(spkPriv[]) is true.
+
+Query not attacker(opkPriv[]) is true.
+
+Query not attacker(alicePass[]) is true.
+
+Query not attacker(alicePass2[]) is true.
+
+Query inj-event(Device2Downloads(k)) ==> inj-event(Device1Uploads(k)) is false.
+
+--------------------------------------------------------------
+

@@ -1,0 +1,333 @@
+Process 0 (that is, the initial process):
+{1}new aChainKey: bitstring;
+{2}new aSigPriv: exponent;
+{3}let aSigPub: G = pk(aSigPriv) in
+{4}out(c, aSigPub);
+{5}out(mutex_lock_bob, nil);
+{6}out(mutex_lock_charlie, nil);
+(
+    {7}!
+    {8}let aChainKey_1: bitstring = aChainKey in
+    {9}let aSigPriv_1: exponent = aSigPriv in
+    {10}let aSigPub_1: G = pk(aSigPriv_1) in
+    {11}new ephAES: bitstring;
+    {12}new ephMAC: bitstring;
+    {13}new msgCounter: counter;
+    {14}let photoEnc: bitstring = senc(photo,ephAES) in
+    {15}let photoMac: bitstring = mac(photoEnc,ephMAC) in
+    {16}let blobSec: bitstring = BlobData(ephAES,ephMAC,photoMac,msgCounter) in
+    {17}let kdfInput: bitstring = mac(aChainKey_1,nil) in
+    {18}let chainKey2: bitstring = hkdf_ck(kdfInput,nil) in
+    {19}let messageKey: bitstring = hkdf_mk(kdfInput,nil) in
+    {20}let blobSecEnc: bitstring = senc(blobSec,messageKey) in
+    {21}let blobSecSigned: bitstring = sign(blobSecEnc,aSigPriv_1) in
+    {22}event AliceInvia(photo,msgCounter);
+    {23}out(c, (aSigPub_1,blobSecEnc,blobSecSigned,photoEnc));
+    {24}phase 1;
+    {25}out(c, chainKey2)
+) | (
+    {26}!
+    {27}let aChainKey_2: bitstring = aChainKey in
+    {28}in(c, (=aSigPub,blobSecEnc_1: bitstring,blobSecSigned_1: bitstring,photoEnc_1: bitstring));
+    {29}let kdfInput_1: bitstring = mac(aChainKey_2,nil) in
+    {30}let chainKey2_1: bitstring = hkdf_ck(kdfInput_1,nil) in
+    {31}let messageKey_1: bitstring = hkdf_mk(kdfInput_1,nil) in
+    {32}if (checksign(blobSecSigned_1,aSigPub) = blobSecEnc_1) then
+    {33}let BlobData(ephAES_1: bitstring,ephMAC_1: bitstring,photoMac_1: bitstring,msgCounter_1: counter) = sdec(blobSecEnc_1,messageKey_1) in
+    {34}if (mac(photoEnc_1,ephMAC_1) = photoMac_1) then
+    {35}let photoDec: bitstring = sdec(photoEnc_1,ephAES_1) in
+    {36}in(mutex_lock_bob, token: bitstring);
+    {41}get seen_counters_bob(=msgCounter_1) in
+        {37}out(mutex_lock_bob, token)
+    else
+        {38}insert seen_counters_bob(msgCounter_1);
+        {39}out(mutex_lock_bob, token);
+        {40}event BobRiceve(photoDec,msgCounter_1)
+) | (
+    {42}!
+    {43}let aChainKey_3: bitstring = aChainKey in
+    {44}in(c, (=aSigPub,blobSecEnc_2: bitstring,blobSecSigned_2: bitstring,photoEnc_2: bitstring));
+    {45}let kdfInput_2: bitstring = mac(aChainKey_3,nil) in
+    {46}let chainKey2_2: bitstring = hkdf_ck(kdfInput_2,nil) in
+    {47}let messageKey_2: bitstring = hkdf_mk(kdfInput_2,nil) in
+    {48}if (checksign(blobSecSigned_2,aSigPub) = blobSecEnc_2) then
+    {49}let BlobData(ephAES_2: bitstring,ephMAC_2: bitstring,photoMac_2: bitstring,msgCounter_2: counter) = sdec(blobSecEnc_2,messageKey_2) in
+    {50}if (mac(photoEnc_2,ephMAC_2) = photoMac_2) then
+    {51}let photoDec_1: bitstring = sdec(photoEnc_2,ephAES_2) in
+    {52}in(mutex_lock_charlie, token_1: bitstring);
+    {57}get seen_counters_charlie(=msgCounter_2) in
+        {53}out(mutex_lock_charlie, token_1)
+    else
+        {54}insert seen_counters_charlie(msgCounter_2);
+        {55}out(mutex_lock_charlie, token_1);
+        {56}event CharlieRiceve(photoDec_1,msgCounter_2)
+)
+
+File "/home/sdigs/unito/tesi/additional_works/01_formal_verification_Proverif/02_sticky_session_fixed.pv", line 62, character 21:
+Warning: identifier c rebound.
+File "/home/sdigs/unito/tesi/additional_works/01_formal_verification_Proverif/02_sticky_session_fixed.pv", line 63, character 21:
+Warning: identifier c rebound.
+--  Process 1 (that is, process 0, with let moved downwards):
+{1}new aChainKey: bitstring;
+{2}new aSigPriv: exponent;
+{3}let aSigPub: G = pk(aSigPriv) in
+{4}out(c, aSigPub);
+{5}out(mutex_lock_bob, nil);
+{6}out(mutex_lock_charlie, nil);
+(
+    {7}!
+    {11}new ephAES: bitstring;
+    {12}new ephMAC: bitstring;
+    {13}new msgCounter: counter;
+    {22}event AliceInvia(photo,msgCounter);
+    {8}let aChainKey_1: bitstring = aChainKey in
+    {17}let kdfInput: bitstring = mac(aChainKey_1,nil) in
+    {19}let messageKey: bitstring = hkdf_mk(kdfInput,nil) in
+    {14}let photoEnc: bitstring = senc(photo,ephAES) in
+    {15}let photoMac: bitstring = mac(photoEnc,ephMAC) in
+    {16}let blobSec: bitstring = BlobData(ephAES,ephMAC,photoMac,msgCounter) in
+    {20}let blobSecEnc: bitstring = senc(blobSec,messageKey) in
+    {9}let aSigPriv_1: exponent = aSigPriv in
+    {21}let blobSecSigned: bitstring = sign(blobSecEnc,aSigPriv_1) in
+    {10}let aSigPub_1: G = pk(aSigPriv_1) in
+    {23}out(c, (aSigPub_1,blobSecEnc,blobSecSigned,photoEnc));
+    {24}phase 1;
+    {18}let chainKey2: bitstring = hkdf_ck(kdfInput,nil) in
+    {25}out(c, chainKey2)
+) | (
+    {26}!
+    {28}in(c, (=aSigPub,blobSecEnc_1: bitstring,blobSecSigned_1: bitstring,photoEnc_1: bitstring));
+    {32}if (checksign(blobSecSigned_1,aSigPub) = blobSecEnc_1) then
+    {27}let aChainKey_2: bitstring = aChainKey in
+    {29}let kdfInput_1: bitstring = mac(aChainKey_2,nil) in
+    {31}let messageKey_1: bitstring = hkdf_mk(kdfInput_1,nil) in
+    {33}let BlobData(ephAES_1: bitstring,ephMAC_1: bitstring,photoMac_1: bitstring,msgCounter_1: counter) = sdec(blobSecEnc_1,messageKey_1) in
+    {34}if (mac(photoEnc_1,ephMAC_1) = photoMac_1) then
+    {35}let photoDec: bitstring = sdec(photoEnc_1,ephAES_1) in
+    {36}in(mutex_lock_bob, token: bitstring);
+    {41}get seen_counters_bob(=msgCounter_1) in
+        {37}out(mutex_lock_bob, token)
+    else
+        {38}insert seen_counters_bob(msgCounter_1);
+        {39}out(mutex_lock_bob, token);
+        {40}event BobRiceve(photoDec,msgCounter_1)
+) | (
+    {42}!
+    {44}in(c, (=aSigPub,blobSecEnc_2: bitstring,blobSecSigned_2: bitstring,photoEnc_2: bitstring));
+    {48}if (checksign(blobSecSigned_2,aSigPub) = blobSecEnc_2) then
+    {43}let aChainKey_3: bitstring = aChainKey in
+    {45}let kdfInput_2: bitstring = mac(aChainKey_3,nil) in
+    {47}let messageKey_2: bitstring = hkdf_mk(kdfInput_2,nil) in
+    {49}let BlobData(ephAES_2: bitstring,ephMAC_2: bitstring,photoMac_2: bitstring,msgCounter_2: counter) = sdec(blobSecEnc_2,messageKey_2) in
+    {50}if (mac(photoEnc_2,ephMAC_2) = photoMac_2) then
+    {51}let photoDec_1: bitstring = sdec(photoEnc_2,ephAES_2) in
+    {52}in(mutex_lock_charlie, token_1: bitstring);
+    {57}get seen_counters_charlie(=msgCounter_2) in
+        {53}out(mutex_lock_charlie, token_1)
+    else
+        {54}insert seen_counters_charlie(msgCounter_2);
+        {55}out(mutex_lock_charlie, token_1);
+        {56}event CharlieRiceve(photoDec_1,msgCounter_2)
+)
+
+-- Query not attacker_p1(photo[]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker_p1(photo[])
+RESULT not attacker_p1(photo[]) is true.
+-- Query not attacker_p1(ephAES[!1 = v]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker_p1(ephAES[!1 = v])
+RESULT not attacker_p1(ephAES[!1 = v]) is true.
+-- Query not attacker_p1(ephMAC[!1 = v]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker_p1(ephMAC[!1 = v])
+RESULT not attacker_p1(ephMAC[!1 = v]) is true.
+-- Query inj-event(BobRiceve(p,c_1)) ==> inj-event(AliceInvia(p,c_1)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(BobRiceve(p,c_1)) ==> inj-event(AliceInvia(p,c_1))
+goal reachable: @sid ≠ @sid_1 && b-event(@p_act(@occ28_4,(pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3)))) && b-inj-event(AliceInvia(photo[],msgCounter_3),@occ22_1) && b-event(@p_act(@occ28_5,(pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3)))) -> inj-event(BobRiceve(photo[],msgCounter_3),@occ40_1) && inj-event(BobRiceve(photo[],msgCounter_3),@occ40_2)
+Abbreviations:
+msgCounter_3 = msgCounter[!1 = @sid_2]
+ephAES_3 = ephAES[!1 = @sid_2]
+ephMAC_3 = ephMAC[!1 = @sid_2]
+@occ40_1 = @occ40[token = nil,photoEnc_1 = senc(photo[],ephAES_3),blobSecSigned_1 = sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),blobSecEnc_1 = senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),!1 = @sid]
+@occ40_2 = @occ40[token = nil,photoEnc_1 = senc(photo[],ephAES_3),blobSecSigned_1 = sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),blobSecEnc_1 = senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),!1 = @sid_1]
+@occ28_4 = @occ28_3[!1 = @sid]
+@occ22_1 = @occ22[!1 = @sid_2]
+@occ28_5 = @occ28_3[!1 = @sid_1]
+
+Derivation:
+Abbreviations:
+msgCounter_3 = msgCounter[!1 = @sid]
+ephAES_3 = ephAES[!1 = @sid]
+ephMAC_3 = ephMAC[!1 = @sid]
+@occ40_1 = @occ40[token = nil,photoEnc_1 = senc(photo[],ephAES_3),blobSecSigned_1 = sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),blobSecEnc_1 = senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),!1 = @sid_1]
+@occ40_2 = @occ40[token = nil,photoEnc_1 = senc(photo[],ephAES_3),blobSecSigned_1 = sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),blobSecEnc_1 = senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),!1 = @sid_2]
+@occ28_4 = @occ28_3[!1 = @sid_1]
+@occ22_1 = @occ22[!1 = @sid]
+@occ28_5 = @occ28_3[!1 = @sid_2]
+
+1. The event AliceInvia(photo[],msgCounter_3) (with occurrence name @occ22_1) may be executed at {22}.
+So the message (pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3)) may be sent to the attacker at output {23}.
+attacker((pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3))).
+
+2. By 1, the attacker may know (pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3)).
+Using the function 4-proj-4-tuple the attacker may obtain senc(photo[],ephAES_3).
+attacker(senc(photo[],ephAES_3)).
+
+3. By 1, the attacker may know (pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3)).
+Using the function 3-proj-4-tuple the attacker may obtain sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]).
+attacker(sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[])).
+
+4. By 1, the attacker may know (pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3)).
+Using the function 2-proj-4-tuple the attacker may obtain senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)).
+attacker(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil))).
+
+5. The message pk(aSigPriv[]) may be sent to the attacker at output {4}.
+attacker(pk(aSigPriv[])).
+
+6. By 5, the attacker may know pk(aSigPriv[]).
+By 4, the attacker may know senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)).
+By 3, the attacker may know sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]).
+By 2, the attacker may know senc(photo[],ephAES_3).
+Using the function 4-tuple the attacker may obtain (pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3)).
+attacker((pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3))).
+
+7. The message nil may be sent on channel mutex_lock_bob[] at output {5}.
+mess(mutex_lock_bob[],nil).
+
+8. The event @p_act(@occ28_5,(pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3))) records how variables are instantiated at {28}.
+The message (pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3)) that the attacker may have by 6 may be received at input {28}.
+The message nil that may be sent on channel mutex_lock_bob[] by 7 may be received at input {36}.
+So event BobRiceve(photo[],msgCounter_3) may be executed at {40} in session @sid_2.
+inj-event(BobRiceve(photo[],msgCounter_3),@occ40_2).
+
+9. By 8, inj-event(BobRiceve(photo[],msgCounter_3),@occ40_2).
+The goal is reached, represented in the following fact:
+inj-event(BobRiceve(photo[],msgCounter_3),@occ40_2).
+
+10. The event @p_act(@occ28_4,(pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3))) records how variables are instantiated at {28}.
+The message (pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3)) that the attacker may have by 6 may be received at input {28}.
+The message nil that may be sent on channel mutex_lock_bob[] by 7 may be received at input {36}.
+So event BobRiceve(photo[],msgCounter_3) may be executed at {40} in session @sid_1.
+inj-event(BobRiceve(photo[],msgCounter_3),@occ40_1).
+
+11. By 10, inj-event(BobRiceve(photo[],msgCounter_3),@occ40_1).
+The goal is reached, represented in the following fact:
+inj-event(BobRiceve(photo[],msgCounter_3),@occ40_1).
+
+12. By 11, inj-event(BobRiceve(photo[],msgCounter_3),@occ40_1).
+By 9, inj-event(BobRiceve(photo[],msgCounter_3),@occ40_2).
+We have @occ40_1 ≠ @occ40_2.
+The goals for injectivity are reached, combined in the following fact:
+inj-event(BobRiceve(photo[],msgCounter_3),@occ40_1) && inj-event(BobRiceve(photo[],msgCounter_3),@occ40_2).
+
+
+Could not find a trace corresponding to this derivation.
+RESULT inj-event(BobRiceve(p,c_1)) ==> inj-event(AliceInvia(p,c_1)) cannot be proved.
+RESULT (but event(BobRiceve(p,c_1)) ==> event(AliceInvia(p,c_1)) is true.)
+-- Query inj-event(CharlieRiceve(p,c_1)) ==> inj-event(AliceInvia(p,c_1)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(CharlieRiceve(p,c_1)) ==> inj-event(AliceInvia(p,c_1))
+goal reachable: @sid ≠ @sid_1 && b-event(@p_act(@occ44_5,(pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3)))) && b-inj-event(AliceInvia(photo[],msgCounter_3),@occ22_2) && b-event(@p_act(@occ44_6,(pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3)))) -> inj-event(CharlieRiceve(photo[],msgCounter_3),@occ56_1) && inj-event(CharlieRiceve(photo[],msgCounter_3),@occ56_2)
+Abbreviations:
+msgCounter_3 = msgCounter[!1 = @sid_2]
+ephAES_3 = ephAES[!1 = @sid_2]
+ephMAC_3 = ephMAC[!1 = @sid_2]
+@occ56_1 = @occ56[token_1 = nil,photoEnc_2 = senc(photo[],ephAES_3),blobSecSigned_2 = sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),blobSecEnc_2 = senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),!1 = @sid]
+@occ56_2 = @occ56[token_1 = nil,photoEnc_2 = senc(photo[],ephAES_3),blobSecSigned_2 = sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),blobSecEnc_2 = senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),!1 = @sid_1]
+@occ44_5 = @occ44_4[!1 = @sid]
+@occ22_2 = @occ22_1[!1 = @sid_2]
+@occ44_6 = @occ44_4[!1 = @sid_1]
+
+Derivation:
+Abbreviations:
+msgCounter_3 = msgCounter[!1 = @sid]
+ephAES_3 = ephAES[!1 = @sid]
+ephMAC_3 = ephMAC[!1 = @sid]
+@occ56_1 = @occ56[token_1 = nil,photoEnc_2 = senc(photo[],ephAES_3),blobSecSigned_2 = sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),blobSecEnc_2 = senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),!1 = @sid_1]
+@occ56_2 = @occ56[token_1 = nil,photoEnc_2 = senc(photo[],ephAES_3),blobSecSigned_2 = sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),blobSecEnc_2 = senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),!1 = @sid_2]
+@occ44_5 = @occ44_4[!1 = @sid_1]
+@occ22_2 = @occ22_1[!1 = @sid]
+@occ44_6 = @occ44_4[!1 = @sid_2]
+
+1. The event AliceInvia(photo[],msgCounter_3) (with occurrence name @occ22_2) may be executed at {22}.
+So the message (pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3)) may be sent to the attacker at output {23}.
+attacker((pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3))).
+
+2. By 1, the attacker may know (pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3)).
+Using the function 4-proj-4-tuple the attacker may obtain senc(photo[],ephAES_3).
+attacker(senc(photo[],ephAES_3)).
+
+3. By 1, the attacker may know (pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3)).
+Using the function 3-proj-4-tuple the attacker may obtain sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]).
+attacker(sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[])).
+
+4. By 1, the attacker may know (pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3)).
+Using the function 2-proj-4-tuple the attacker may obtain senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)).
+attacker(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil))).
+
+5. The message pk(aSigPriv[]) may be sent to the attacker at output {4}.
+attacker(pk(aSigPriv[])).
+
+6. By 5, the attacker may know pk(aSigPriv[]).
+By 4, the attacker may know senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)).
+By 3, the attacker may know sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]).
+By 2, the attacker may know senc(photo[],ephAES_3).
+Using the function 4-tuple the attacker may obtain (pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3)).
+attacker((pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3))).
+
+7. The message nil may be sent on channel mutex_lock_charlie[] at output {6}.
+mess(mutex_lock_charlie[],nil).
+
+8. The event @p_act(@occ44_6,(pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3))) records how variables are instantiated at {44}.
+The message (pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3)) that the attacker may have by 6 may be received at input {44}.
+The message nil that may be sent on channel mutex_lock_charlie[] by 7 may be received at input {52}.
+So event CharlieRiceve(photo[],msgCounter_3) may be executed at {56} in session @sid_2.
+inj-event(CharlieRiceve(photo[],msgCounter_3),@occ56_2).
+
+9. By 8, inj-event(CharlieRiceve(photo[],msgCounter_3),@occ56_2).
+The goal is reached, represented in the following fact:
+inj-event(CharlieRiceve(photo[],msgCounter_3),@occ56_2).
+
+10. The event @p_act(@occ44_5,(pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3))) records how variables are instantiated at {44}.
+The message (pk(aSigPriv[]),senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES_3,ephMAC_3,mac(senc(photo[],ephAES_3),ephMAC_3),msgCounter_3),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo[],ephAES_3)) that the attacker may have by 6 may be received at input {44}.
+The message nil that may be sent on channel mutex_lock_charlie[] by 7 may be received at input {52}.
+So event CharlieRiceve(photo[],msgCounter_3) may be executed at {56} in session @sid_1.
+inj-event(CharlieRiceve(photo[],msgCounter_3),@occ56_1).
+
+11. By 10, inj-event(CharlieRiceve(photo[],msgCounter_3),@occ56_1).
+The goal is reached, represented in the following fact:
+inj-event(CharlieRiceve(photo[],msgCounter_3),@occ56_1).
+
+12. By 11, inj-event(CharlieRiceve(photo[],msgCounter_3),@occ56_1).
+By 9, inj-event(CharlieRiceve(photo[],msgCounter_3),@occ56_2).
+We have @occ56_1 ≠ @occ56_2.
+The goals for injectivity are reached, combined in the following fact:
+inj-event(CharlieRiceve(photo[],msgCounter_3),@occ56_1) && inj-event(CharlieRiceve(photo[],msgCounter_3),@occ56_2).
+
+
+Could not find a trace corresponding to this derivation.
+RESULT inj-event(CharlieRiceve(p,c_1)) ==> inj-event(AliceInvia(p,c_1)) cannot be proved.
+RESULT (but event(CharlieRiceve(p,c_1)) ==> event(AliceInvia(p,c_1)) is true.)
+
+--------------------------------------------------------------
+Verification summary:
+
+Query not attacker_p1(photo[]) is true.
+
+Query not attacker_p1(ephAES[!1 = v]) is true.
+
+Query not attacker_p1(ephMAC[!1 = v]) is true.
+
+Query inj-event(BobRiceve(p,c_1)) ==> inj-event(AliceInvia(p,c_1)) cannot be proved.
+
+Query inj-event(CharlieRiceve(p,c_1)) ==> inj-event(AliceInvia(p,c_1)) cannot be proved.
+
+--------------------------------------------------------------
+

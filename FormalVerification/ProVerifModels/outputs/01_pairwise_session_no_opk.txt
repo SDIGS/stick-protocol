@@ -1,0 +1,431 @@
+Linear part:
+dh(pk(x),y) = dh(pk(y),x)
+Completing equations...
+Completed equations:
+dh(pk(x),y) = dh(pk(y),x)
+Convergent part: No equation.
+Process 0 (that is, the initial process):
+{1}let aIkPub: G = pk(aIkPriv) in
+{2}let bIkPub: G = pk(bIkPriv) in
+(
+    {3}let aIkPriv_1: exponent = aIkPriv in
+    {4}let aIkPub_1: G = pk(aIkPriv_1) in
+    {5}in(c, (=bIkPub,Bundle(bSig: bitstring,bSpkPub: G)));
+    {6}if (checksign(bSig,bIkPub) = bSpkPub) then
+    {7}new aEk1Priv: exponent;
+    {8}let aEk1Pub: G = pk(aEk1Priv) in
+    {9}let dh1: G = dh(bSpkPub,aIkPriv_1) in
+    {10}let dh2: G = dh(bIkPub,aEk1Priv) in
+    {11}let dh3: G = dh(bSpkPub,aEk1Priv) in
+    {12}let aMasterSec: bitstring = hash3(G2B(dh1),G2B(dh2),G2B(dh3)) in
+    {13}let aRK1: bitstring = hkdf_rk(aMasterSec,nil) in
+    {14}let aCkBA1: bitstring = hkdf_ck(aMasterSec,nil) in
+    {15}new aEk2Priv: exponent;
+    {16}let aEk2Pub: G = pk(aEk2Priv) in
+    {17}let aDH1: G = dh(bSpkPub,aEk2Priv) in
+    {18}let aRK2: bitstring = hkdf_rk(G2B(aDH1),aRK1) in
+    {19}let aCkAB1: bitstring = hkdf_ck(G2B(aDH1),aRK1) in
+    {20}let mac_out: bitstring = mac(aCkAB1,nil) in
+    {21}let aCkAB2: bitstring = hkdf_rk(mac_out,nil) in
+    {22}let aMk1: bitstring = hkdf_ck(mac_out,nil) in
+    {23}let ad: bitstring = hash3(G2B(aIkPub_1),G2B(bIkPub),G2B(aEk2Pub)) in
+    {24}let msg1Enc: bitstring = aead_enc(aMk1,secret_msg,ad) in
+    {25}event AliceInvia(aIkPub_1,msg1Enc);
+    {26}out(c, (aIkPub_1,aEk1Pub,aEk2Pub,msg1Enc));
+    {27}phase 1;
+    {28}out(c, aIkPriv_1)
+) | (
+    {29}let bIkPriv_1: exponent = bIkPriv in
+    {30}let bSpkPriv_1: exponent = bSpkPriv in
+    {31}let bIkPub_1: G = pk(bIkPriv_1) in
+    {32}let bSpkPub_1: G = pk(bSpkPriv_1) in
+    {33}let bSig_1: bitstring = sign(bSpkPub_1,bIkPriv_1) in
+    {34}out(c, (bIkPub_1,Bundle(bSig_1,bSpkPub_1)));
+    {35}in(c, (=aIkPub,aEk1Pub_1: G,aEk2Pub_1: G,msg1Enc_1: bitstring));
+    {36}let b_dh1: G = dh(aIkPub,bSpkPriv_1) in
+    {37}let b_dh2: G = dh(aEk1Pub_1,bIkPriv_1) in
+    {38}let b_dh3: G = dh(aEk1Pub_1,bSpkPriv_1) in
+    {39}let bMaster: bitstring = hash3(G2B(b_dh1),G2B(b_dh2),G2B(b_dh3)) in
+    {40}let bRK1: bitstring = hkdf_rk(bMaster,nil) in
+    {41}let bDH1: G = dh(aEk2Pub_1,bSpkPriv_1) in
+    {42}let bRK2: bitstring = hkdf_rk(G2B(bDH1),bRK1) in
+    {43}let bCkAB1: bitstring = hkdf_ck(G2B(bDH1),bRK1) in
+    {44}let b_mac_out: bitstring = mac(bCkAB1,nil) in
+    {45}let bCkAB2: bitstring = hkdf_rk(b_mac_out,nil) in
+    {46}let bMk1: bitstring = hkdf_ck(b_mac_out,nil) in
+    {47}let ad_1: bitstring = hash3(G2B(aIkPub),G2B(bIkPub_1),G2B(aEk2Pub_1)) in
+    {48}let msg1Dec: bitstring = aead_dec(bMk1,msg1Enc_1,ad_1) in
+    {49}event BobRiceve(aIkPub,msg1Enc_1);
+    {50}phase 1;
+    {51}out(c, bIkPriv_1);
+    {52}out(c, bSpkPriv_1)
+)
+
+--  Process 1 (that is, process 0, with let moved downwards):
+(
+    {2}let bIkPub: G = pk(bIkPriv) in
+    {5}in(c, (=bIkPub,Bundle(bSig: bitstring,bSpkPub: G)));
+    {6}if (checksign(bSig,bIkPub) = bSpkPub) then
+    {7}new aEk1Priv: exponent;
+    {15}new aEk2Priv: exponent;
+    {16}let aEk2Pub: G = pk(aEk2Priv) in
+    {3}let aIkPriv_1: exponent = aIkPriv in
+    {4}let aIkPub_1: G = pk(aIkPriv_1) in
+    {23}let ad: bitstring = hash3(G2B(aIkPub_1),G2B(bIkPub),G2B(aEk2Pub)) in
+    {17}let aDH1: G = dh(bSpkPub,aEk2Priv) in
+    {11}let dh3: G = dh(bSpkPub,aEk1Priv) in
+    {10}let dh2: G = dh(bIkPub,aEk1Priv) in
+    {9}let dh1: G = dh(bSpkPub,aIkPriv_1) in
+    {12}let aMasterSec: bitstring = hash3(G2B(dh1),G2B(dh2),G2B(dh3)) in
+    {13}let aRK1: bitstring = hkdf_rk(aMasterSec,nil) in
+    {19}let aCkAB1: bitstring = hkdf_ck(G2B(aDH1),aRK1) in
+    {20}let mac_out: bitstring = mac(aCkAB1,nil) in
+    {22}let aMk1: bitstring = hkdf_ck(mac_out,nil) in
+    {24}let msg1Enc: bitstring = aead_enc(aMk1,secret_msg,ad) in
+    {25}event AliceInvia(aIkPub_1,msg1Enc);
+    {8}let aEk1Pub: G = pk(aEk1Priv) in
+    {26}out(c, (aIkPub_1,aEk1Pub,aEk2Pub,msg1Enc));
+    {27}phase 1;
+    {28}out(c, aIkPriv_1)
+) | (
+    {30}let bSpkPriv_1: exponent = bSpkPriv in
+    {32}let bSpkPub_1: G = pk(bSpkPriv_1) in
+    {29}let bIkPriv_1: exponent = bIkPriv in
+    {33}let bSig_1: bitstring = sign(bSpkPub_1,bIkPriv_1) in
+    {31}let bIkPub_1: G = pk(bIkPriv_1) in
+    {34}out(c, (bIkPub_1,Bundle(bSig_1,bSpkPub_1)));
+    {1}let aIkPub: G = pk(aIkPriv) in
+    {35}in(c, (=aIkPub,aEk1Pub_1: G,aEk2Pub_1: G,msg1Enc_1: bitstring));
+    {47}let ad_1: bitstring = hash3(G2B(aIkPub),G2B(bIkPub_1),G2B(aEk2Pub_1)) in
+    {41}let bDH1: G = dh(aEk2Pub_1,bSpkPriv_1) in
+    {38}let b_dh3: G = dh(aEk1Pub_1,bSpkPriv_1) in
+    {37}let b_dh2: G = dh(aEk1Pub_1,bIkPriv_1) in
+    {36}let b_dh1: G = dh(aIkPub,bSpkPriv_1) in
+    {39}let bMaster: bitstring = hash3(G2B(b_dh1),G2B(b_dh2),G2B(b_dh3)) in
+    {40}let bRK1: bitstring = hkdf_rk(bMaster,nil) in
+    {43}let bCkAB1: bitstring = hkdf_ck(G2B(bDH1),bRK1) in
+    {44}let b_mac_out: bitstring = mac(bCkAB1,nil) in
+    {46}let bMk1: bitstring = hkdf_ck(b_mac_out,nil) in
+    {48}let msg1Dec: bitstring = aead_dec(bMk1,msg1Enc_1,ad_1) in
+    {49}event BobRiceve(aIkPub,msg1Enc_1);
+    {50}phase 1;
+    {51}out(c, bIkPriv_1);
+    {52}out(c, bSpkPriv_1)
+)
+
+Declared: select attacker_p1(dh(y,x))/5000
+-- Query not attacker_p1(secret_msg[]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+200 rules inserted. Base: 177 rules (56 with conclusion selected). Queue: 54 rules.
+400 rules inserted. Base: 321 rules (81 with conclusion selected). Queue: 112 rules.
+600 rules inserted. Base: 457 rules (81 with conclusion selected). Queue: 112 rules.
+800 rules inserted. Base: 657 rules (113 with conclusion selected). Queue: 96 rules.
+1000 rules inserted. Base: 857 rules (113 with conclusion selected). Queue: 128 rules.
+1200 rules inserted. Base: 1057 rules (113 with conclusion selected). Queue: 182 rules.
+1400 rules inserted. Base: 1257 rules (113 with conclusion selected). Queue: 251 rules.
+1600 rules inserted. Base: 1457 rules (113 with conclusion selected). Queue: 312 rules.
+1800 rules inserted. Base: 1654 rules (113 with conclusion selected). Queue: 297 rules.
+2000 rules inserted. Base: 1853 rules (113 with conclusion selected). Queue: 271 rules.
+2200 rules inserted. Base: 2035 rules (113 with conclusion selected). Queue: 181 rules.
+2400 rules inserted. Base: 2187 rules (113 with conclusion selected). Queue: 81 rules.
+2600 rules inserted. Base: 2199 rules (113 with conclusion selected). Queue: 17 rules.
+ok, secrecy assumption verified: fact unreachable attacker(aIkPriv[])
+ok, secrecy assumption verified: fact unreachable attacker(bIkPriv[])
+ok, secrecy assumption verified: fact unreachable attacker(bSpkPriv[])
+Starting query not attacker_p1(secret_msg[])
+goal reachable: b-event(@p_act(@occ35[],(pk(aIkPriv[]),pk(aEk1Priv_1),pk(aEk2Priv_1),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv[]),aIkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))))))) && b-event(@p_act(@occ5[],(pk(bIkPriv[]),Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[]))))) -> attacker_p1(secret_msg[])
+Abbreviations:
+aEk1Priv_1 = aEk1Priv[bSpkPub = pk(bSpkPriv[]),bSig = sign(pk(bSpkPriv[]),bIkPriv[])]
+aEk2Priv_1 = aEk2Priv[bSpkPub = pk(bSpkPriv[]),bSig = sign(pk(bSpkPriv[]),bIkPriv[])]
+
+Derivation:
+Abbreviations:
+aEk2Priv_1 = aEk2Priv[bSpkPub = pk(bSpkPriv[]),bSig = sign(pk(bSpkPriv[]),bIkPriv[])]
+aEk1Priv_1 = aEk1Priv[bSpkPub = pk(bSpkPriv[]),bSig = sign(pk(bSpkPriv[]),bIkPriv[])]
+
+1. The message (pk(bIkPriv[]),Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[]))) may be sent to the attacker at output {34}.
+attacker((pk(bIkPriv[]),Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[])))).
+
+2. By 1, the attacker may know (pk(bIkPriv[]),Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[]))).
+Using the function 2-proj-2-tuple the attacker may obtain Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[])).
+attacker(Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[]))).
+
+3. By 2, the attacker may know Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[])).
+Using the function 2-proj-Bundle the attacker may obtain pk(bSpkPriv[]).
+attacker(pk(bSpkPriv[])).
+
+4. By 2, the attacker may know Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[])).
+Using the function 1-proj-Bundle the attacker may obtain sign(pk(bSpkPriv[]),bIkPriv[]).
+attacker(sign(pk(bSpkPriv[]),bIkPriv[])).
+
+5. By 4, the attacker may know sign(pk(bSpkPriv[]),bIkPriv[]).
+By 3, the attacker may know pk(bSpkPriv[]).
+Using the function Bundle the attacker may obtain Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[])).
+attacker(Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[]))).
+
+6. By 1, the attacker may know (pk(bIkPriv[]),Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[]))).
+Using the function 1-proj-2-tuple the attacker may obtain pk(bIkPriv[]).
+attacker(pk(bIkPriv[])).
+
+7. By 6, the attacker may know pk(bIkPriv[]).
+By 5, the attacker may know Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[])).
+Using the function 2-tuple the attacker may obtain (pk(bIkPriv[]),Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[]))).
+attacker((pk(bIkPriv[]),Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[])))).
+
+8. The event @p_act(@occ5[],(pk(bIkPriv[]),Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[])))) records how variables are instantiated at {5}.
+The message (pk(bIkPriv[]),Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[]))) that the attacker may have by 7 may be received at input {5}.
+So the message (pk(aIkPriv[]),pk(aEk1Priv_1),pk(aEk2Priv_1),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv[]),aIkPriv[])),G2B(dh(pk(aEk1Priv_1),bIkPriv[])),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))))) may be sent to the attacker at output {26}.
+attacker((pk(aIkPriv[]),pk(aEk1Priv_1),pk(aEk2Priv_1),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv[]),aIkPriv[])),G2B(dh(pk(aEk1Priv_1),bIkPriv[])),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1)))))).
+
+9. By 8, the attacker may know (pk(aIkPriv[]),pk(aEk1Priv_1),pk(aEk2Priv_1),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv[]),aIkPriv[])),G2B(dh(pk(aEk1Priv_1),bIkPriv[])),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))))).
+Using the function 3-proj-4-tuple the attacker may obtain pk(aEk2Priv_1).
+attacker(pk(aEk2Priv_1)).
+
+10. By 9, the attacker may know pk(aEk2Priv_1).
+So the attacker may know pk(aEk2Priv_1) in phase 1.
+attacker_p1(pk(aEk2Priv_1)).
+
+11. By 10, the attacker may know pk(aEk2Priv_1) in phase 1.
+Using the function G2B the attacker may obtain G2B(pk(aEk2Priv_1)) in phase 1.
+attacker_p1(G2B(pk(aEk2Priv_1))).
+
+12. The event @p_act(@occ5[],(pk(bIkPriv[]),Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[])))) records how variables are instantiated at {5}.
+The message (pk(bIkPriv[]),Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[]))) that the attacker may have by 7 may be received at input {5}.
+So the message (pk(aIkPriv[]),pk(aEk1Priv_1),pk(aEk2Priv_1),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv[]),aIkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))))) may be sent to the attacker at output {26}.
+attacker((pk(aIkPriv[]),pk(aEk1Priv_1),pk(aEk2Priv_1),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv[]),aIkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1)))))).
+
+13. By 12, the attacker may know (pk(aIkPriv[]),pk(aEk1Priv_1),pk(aEk2Priv_1),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv[]),aIkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))))).
+Using the function 4-proj-4-tuple the attacker may obtain aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv[]),aIkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1)))).
+attacker(aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv[]),aIkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))))).
+
+14. By 8, the attacker may know (pk(aIkPriv[]),pk(aEk1Priv_1),pk(aEk2Priv_1),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv[]),aIkPriv[])),G2B(dh(pk(aEk1Priv_1),bIkPriv[])),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))))).
+Using the function 2-proj-4-tuple the attacker may obtain pk(aEk1Priv_1).
+attacker(pk(aEk1Priv_1)).
+
+15. By 8, the attacker may know (pk(aIkPriv[]),pk(aEk1Priv_1),pk(aEk2Priv_1),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv[]),aIkPriv[])),G2B(dh(pk(aEk1Priv_1),bIkPriv[])),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))))).
+Using the function 1-proj-4-tuple the attacker may obtain pk(aIkPriv[]).
+attacker(pk(aIkPriv[])).
+
+16. By 15, the attacker may know pk(aIkPriv[]).
+By 14, the attacker may know pk(aEk1Priv_1).
+By 9, the attacker may know pk(aEk2Priv_1).
+By 13, the attacker may know aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv[]),aIkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1)))).
+Using the function 4-tuple the attacker may obtain (pk(aIkPriv[]),pk(aEk1Priv_1),pk(aEk2Priv_1),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv[]),aIkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))))).
+attacker((pk(aIkPriv[]),pk(aEk1Priv_1),pk(aEk2Priv_1),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv[]),aIkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1)))))).
+
+17. The event @p_act(@occ35[],(pk(aIkPriv[]),pk(aEk1Priv_1),pk(aEk2Priv_1),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv[]),aIkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1)))))) records how variables are instantiated at {35}.
+The message (pk(aIkPriv[]),pk(aEk1Priv_1),pk(aEk2Priv_1),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv[]),aIkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))))) that the attacker may have by 16 may be received at input {35}.
+So the message bIkPriv[] may be sent to the attacker in phase 1 at output {51}.
+attacker_p1(bIkPriv[]).
+
+18. By 17, the attacker may know bIkPriv[] in phase 1.
+Using the function pk the attacker may obtain pk(bIkPriv[]) in phase 1.
+attacker_p1(pk(bIkPriv[])).
+
+19. By 18, the attacker may know pk(bIkPriv[]) in phase 1.
+Using the function G2B the attacker may obtain G2B(pk(bIkPriv[])) in phase 1.
+attacker_p1(G2B(pk(bIkPriv[]))).
+
+20. The event @p_act(@occ5[],(pk(bIkPriv[]),Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[])))) records how variables are instantiated at {5}.
+The message (pk(bIkPriv[]),Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[]))) that the attacker may have by 7 may be received at input {5}.
+So the message aIkPriv[] may be sent to the attacker in phase 1 at output {28}.
+attacker_p1(aIkPriv[]).
+
+21. By 20, the attacker may know aIkPriv[] in phase 1.
+Using the function pk the attacker may obtain pk(aIkPriv[]) in phase 1.
+attacker_p1(pk(aIkPriv[])).
+
+22. By 21, the attacker may know pk(aIkPriv[]) in phase 1.
+Using the function G2B the attacker may obtain G2B(pk(aIkPriv[])) in phase 1.
+attacker_p1(G2B(pk(aIkPriv[]))).
+
+23. By 22, the attacker may know G2B(pk(aIkPriv[])) in phase 1.
+By 19, the attacker may know G2B(pk(bIkPriv[])) in phase 1.
+By 11, the attacker may know G2B(pk(aEk2Priv_1)) in phase 1.
+Using the function hash3 the attacker may obtain hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))) in phase 1.
+attacker_p1(hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1)))).
+
+24. The event @p_act(@occ5[],(pk(bIkPriv[]),Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[])))) records how variables are instantiated at {5}.
+The message (pk(bIkPriv[]),Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[]))) that the attacker may have by 7 may be received at input {5}.
+So the message (pk(aIkPriv[]),pk(aEk1Priv_1),pk(aEk2Priv_1),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))))) may be sent to the attacker at output {26}.
+attacker((pk(aIkPriv[]),pk(aEk1Priv_1),pk(aEk2Priv_1),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1)))))).
+
+25. By 24, the attacker may know (pk(aIkPriv[]),pk(aEk1Priv_1),pk(aEk2Priv_1),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))))).
+Using the function 4-proj-4-tuple the attacker may obtain aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1)))).
+attacker(aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))))).
+
+26. By 25, the attacker may know aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1)))).
+So the attacker may know aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1)))) in phase 1.
+attacker_p1(aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))))).
+
+27. Using the function nil the attacker may obtain nil in phase 1.
+attacker_p1(nil).
+
+28. The event @p_act(@occ35[],(pk(aIkPriv[]),pk(aEk1Priv_1),pk(aEk2Priv_1),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv[]),aIkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1)))))) records how variables are instantiated at {35}.
+The message (pk(aIkPriv[]),pk(aEk1Priv_1),pk(aEk2Priv_1),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv[]),aIkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))))) that the attacker may have by 16 may be received at input {35}.
+So the message bSpkPriv[] may be sent to the attacker in phase 1 at output {52}.
+attacker_p1(bSpkPriv[]).
+
+29. By 14, the attacker may know pk(aEk1Priv_1).
+So the attacker may know pk(aEk1Priv_1) in phase 1.
+attacker_p1(pk(aEk1Priv_1)).
+
+30. By 29, the attacker may know pk(aEk1Priv_1) in phase 1.
+By 28, the attacker may know bSpkPriv[] in phase 1.
+Using the function dh the attacker may obtain dh(pk(bSpkPriv[]),aEk1Priv_1) in phase 1.
+attacker_p1(dh(pk(bSpkPriv[]),aEk1Priv_1)).
+
+31. By 30, the attacker may know dh(pk(bSpkPriv[]),aEk1Priv_1) in phase 1.
+Using the function G2B the attacker may obtain G2B(dh(pk(bSpkPriv[]),aEk1Priv_1)) in phase 1.
+attacker_p1(G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))).
+
+32. By 29, the attacker may know pk(aEk1Priv_1) in phase 1.
+By 17, the attacker may know bIkPriv[] in phase 1.
+Using the function dh the attacker may obtain dh(pk(bIkPriv[]),aEk1Priv_1) in phase 1.
+attacker_p1(dh(pk(bIkPriv[]),aEk1Priv_1)).
+
+33. By 32, the attacker may know dh(pk(bIkPriv[]),aEk1Priv_1) in phase 1.
+Using the function G2B the attacker may obtain G2B(dh(pk(bIkPriv[]),aEk1Priv_1)) in phase 1.
+attacker_p1(G2B(dh(pk(bIkPriv[]),aEk1Priv_1))).
+
+34. By 21, the attacker may know pk(aIkPriv[]) in phase 1.
+By 28, the attacker may know bSpkPriv[] in phase 1.
+Using the function dh the attacker may obtain dh(pk(aIkPriv[]),bSpkPriv[]) in phase 1.
+attacker_p1(dh(pk(aIkPriv[]),bSpkPriv[])).
+
+35. By 34, the attacker may know dh(pk(aIkPriv[]),bSpkPriv[]) in phase 1.
+Using the function G2B the attacker may obtain G2B(dh(pk(aIkPriv[]),bSpkPriv[])) in phase 1.
+attacker_p1(G2B(dh(pk(aIkPriv[]),bSpkPriv[]))).
+
+36. By 35, the attacker may know G2B(dh(pk(aIkPriv[]),bSpkPriv[])) in phase 1.
+By 33, the attacker may know G2B(dh(pk(bIkPriv[]),aEk1Priv_1)) in phase 1.
+By 31, the attacker may know G2B(dh(pk(bSpkPriv[]),aEk1Priv_1)) in phase 1.
+Using the function hash3 the attacker may obtain hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))) in phase 1.
+attacker_p1(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1)))).
+
+37. By 36, the attacker may know hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))) in phase 1.
+By 27, the attacker may know nil in phase 1.
+Using the function hkdf_rk the attacker may obtain hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil) in phase 1.
+attacker_p1(hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)).
+
+38. By 10, the attacker may know pk(aEk2Priv_1) in phase 1.
+By 28, the attacker may know bSpkPriv[] in phase 1.
+Using the function dh the attacker may obtain dh(pk(bSpkPriv[]),aEk2Priv_1) in phase 1.
+attacker_p1(dh(pk(bSpkPriv[]),aEk2Priv_1)).
+
+39. By 38, the attacker may know dh(pk(bSpkPriv[]),aEk2Priv_1) in phase 1.
+Using the function G2B the attacker may obtain G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)) in phase 1.
+attacker_p1(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1))).
+
+40. By 39, the attacker may know G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)) in phase 1.
+By 37, the attacker may know hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil) in phase 1.
+Using the function hkdf_ck the attacker may obtain hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)) in phase 1.
+attacker_p1(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil))).
+
+41. By 40, the attacker may know hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)) in phase 1.
+By 27, the attacker may know nil in phase 1.
+Using the function mac the attacker may obtain mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil) in phase 1.
+attacker_p1(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil)).
+
+42. By 41, the attacker may know mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil) in phase 1.
+By 27, the attacker may know nil in phase 1.
+Using the function hkdf_ck the attacker may obtain hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil) in phase 1.
+attacker_p1(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil)).
+
+43. By 42, the attacker may know hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil) in phase 1.
+By 26, the attacker may know aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv[]),aEk2Priv_1)),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(bIkPriv[]),aEk1Priv_1)),G2B(dh(pk(bSpkPriv[]),aEk1Priv_1))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1)))) in phase 1.
+By 23, the attacker may know hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))) in phase 1.
+Using the function aead_dec the attacker may obtain secret_msg[] in phase 1.
+attacker_p1(secret_msg[]).
+
+44. By 43, attacker_p1(secret_msg[]).
+The goal is reached, represented in the following fact:
+attacker_p1(secret_msg[]).
+
+
+A more detailed output of the traces is available with
+  set traceDisplay = long.
+
+out(c, (~M,Bundle(~M_1,~M_2))) with ~M = pk(bIkPriv), ~M_1 = sign(pk(bSpkPriv),bIkPriv), ~M_2 = pk(bSpkPriv) at {34}
+
+in(c, (~M,Bundle(~M_1,~M_2))) with ~M = pk(bIkPriv), ~M_1 = sign(pk(bSpkPriv),bIkPriv), ~M_2 = pk(bSpkPriv) at {5}
+
+new aEk1Priv: exponent creating aEk1Priv_2 at {7}
+
+new aEk2Priv: exponent creating aEk2Priv_2 at {15}
+
+event AliceInvia(pk(aIkPriv),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv),aEk2Priv_2)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv),aIkPriv)),G2B(dh(pk(bIkPriv),aEk1Priv_2)),G2B(dh(pk(bSpkPriv),aEk1Priv_2))),nil)),nil),nil),secret_msg,hash3(G2B(pk(aIkPriv)),G2B(pk(bIkPriv)),G2B(pk(aEk2Priv_2))))) at {25}
+
+out(c, (~M_3,~M_4,~M_5,~M_6)) with ~M_3 = pk(aIkPriv), ~M_4 = pk(aEk1Priv_2), ~M_5 = pk(aEk2Priv_2), ~M_6 = aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv),aEk2Priv_2)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv),aIkPriv)),G2B(dh(pk(bIkPriv),aEk1Priv_2)),G2B(dh(pk(bSpkPriv),aEk1Priv_2))),nil)),nil),nil),secret_msg,hash3(G2B(pk(aIkPriv)),G2B(pk(bIkPriv)),G2B(pk(aEk2Priv_2)))) at {26}
+
+in(c, (~M_3,~M_4,~M_5,~M_6)) with ~M_3 = pk(aIkPriv), ~M_4 = pk(aEk1Priv_2), ~M_5 = pk(aEk2Priv_2), ~M_6 = aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv),aEk2Priv_2)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv),aIkPriv)),G2B(dh(pk(bIkPriv),aEk1Priv_2)),G2B(dh(pk(bSpkPriv),aEk1Priv_2))),nil)),nil),nil),secret_msg,hash3(G2B(pk(aIkPriv)),G2B(pk(bIkPriv)),G2B(pk(aEk2Priv_2)))) at {35}
+
+event BobRiceve(pk(aIkPriv),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(bSpkPriv),aEk2Priv_2)),hkdf_rk(hash3(G2B(dh(pk(bSpkPriv),aIkPriv)),G2B(dh(pk(bIkPriv),aEk1Priv_2)),G2B(dh(pk(bSpkPriv),aEk1Priv_2))),nil)),nil),nil),secret_msg,hash3(G2B(pk(aIkPriv)),G2B(pk(bIkPriv)),G2B(pk(aEk2Priv_2))))) at {49}
+
+out(c, ~M_7) with ~M_7 = bIkPriv at {51}
+
+out(c, ~M_8) with ~M_8 = bSpkPriv at {52}
+
+out(c, ~M_9) with ~M_9 = aIkPriv at {28}
+
+The attacker has the message aead_dec(hkdf_ck(mac(hkdf_ck(G2B(dh(~M_5,~M_8)),hkdf_rk(hash3(G2B(dh(~M_3,~M_8)),G2B(dh(~M_4,~M_7)),G2B(dh(~M_4,~M_8))),nil)),nil),nil),~M_6,hash3(G2B(~M_3),G2B(~M),G2B(~M_5))) = secret_msg in phase 1.
+A trace has been found.
+RESULT not attacker_p1(secret_msg[]) is false.
+Declared: select attacker_p1(dh(y,x))/5000
+-- Query inj-event(BobRiceve(pk(aIkPriv[]),m)) ==> inj-event(AliceInvia(pk(aIkPriv[]),m)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+200 rules inserted. Base: 190 rules (51 with conclusion selected). Queue: 135 rules.
+400 rules inserted. Base: 269 rules (56 with conclusion selected). Queue: 130 rules.
+600 rules inserted. Base: 435 rules (136 with conclusion selected). Queue: 225 rules.
+800 rules inserted. Base: 570 rules (216 with conclusion selected). Queue: 144 rules.
+1000 rules inserted. Base: 710 rules (216 with conclusion selected). Queue: 145 rules.
+1200 rules inserted. Base: 874 rules (255 with conclusion selected). Queue: 118 rules.
+1400 rules inserted. Base: 1074 rules (264 with conclusion selected). Queue: 94 rules.
+1600 rules inserted. Base: 1274 rules (264 with conclusion selected). Queue: 142 rules.
+1800 rules inserted. Base: 1474 rules (264 with conclusion selected). Queue: 199 rules.
+2000 rules inserted. Base: 1674 rules (264 with conclusion selected). Queue: 273 rules.
+2200 rules inserted. Base: 1874 rules (264 with conclusion selected). Queue: 369 rules.
+2400 rules inserted. Base: 2063 rules (264 with conclusion selected). Queue: 450 rules.
+2600 rules inserted. Base: 2240 rules (264 with conclusion selected). Queue: 508 rules.
+2800 rules inserted. Base: 2416 rules (264 with conclusion selected). Queue: 568 rules.
+3000 rules inserted. Base: 2583 rules (264 with conclusion selected). Queue: 591 rules.
+3200 rules inserted. Base: 2751 rules (264 with conclusion selected). Queue: 627 rules.
+3400 rules inserted. Base: 2901 rules (264 with conclusion selected). Queue: 650 rules.
+3600 rules inserted. Base: 3034 rules (264 with conclusion selected). Queue: 680 rules.
+3800 rules inserted. Base: 3167 rules (264 with conclusion selected). Queue: 710 rules.
+4000 rules inserted. Base: 3264 rules (264 with conclusion selected). Queue: 723 rules.
+4200 rules inserted. Base: 3323 rules (264 with conclusion selected). Queue: 702 rules.
+4400 rules inserted. Base: 3401 rules (264 with conclusion selected). Queue: 668 rules.
+4600 rules inserted. Base: 3468 rules (264 with conclusion selected). Queue: 632 rules.
+4800 rules inserted. Base: 3421 rules (264 with conclusion selected). Queue: 570 rules.
+5000 rules inserted. Base: 3376 rules (264 with conclusion selected). Queue: 489 rules.
+5200 rules inserted. Base: 3363 rules (264 with conclusion selected). Queue: 416 rules.
+5400 rules inserted. Base: 3409 rules (264 with conclusion selected). Queue: 299 rules.
+5600 rules inserted. Base: 3438 rules (264 with conclusion selected). Queue: 180 rules.
+5800 rules inserted. Base: 3499 rules (264 with conclusion selected). Queue: 86 rules.
+6000 rules inserted. Base: 3636 rules (264 with conclusion selected). Queue: 72 rules.
+6200 rules inserted. Base: 3525 rules (278 with conclusion selected). Queue: 89 rules.
+ok, secrecy assumption verified: fact unreachable attacker(aIkPriv[])
+ok, secrecy assumption verified: fact unreachable attacker(bIkPriv[])
+ok, secrecy assumption verified: fact unreachable attacker(bSpkPriv[])
+Starting query inj-event(BobRiceve(pk(aIkPriv[]),m)) ==> inj-event(AliceInvia(pk(aIkPriv[]),m))
+goal reachable: b-inj-event(AliceInvia(pk(aIkPriv[]),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(aEk2Priv_1),bSpkPriv[])),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(aEk1Priv_1),bIkPriv[])),G2B(dh(pk(aEk1Priv_1),bSpkPriv[]))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))))),@occ25_1) && b-event(@p_act(@occ5_1[],(pk(bIkPriv[]),Bundle(sign(pk(bSpkPriv[]),bIkPriv[]),pk(bSpkPriv[]))))) && b-event(@p_act(@occ35_1[],(pk(aIkPriv[]),pk(aEk1Priv_1),pk(aEk2Priv_1),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(aEk2Priv_1),bSpkPriv[])),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(aEk1Priv_1),bIkPriv[])),G2B(dh(pk(aEk1Priv_1),bSpkPriv[]))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))))))) -> inj-event(BobRiceve(pk(aIkPriv[]),aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(aEk2Priv_1),bSpkPriv[])),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(aEk1Priv_1),bIkPriv[])),G2B(dh(pk(aEk1Priv_1),bSpkPriv[]))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1))))),@occ49_1)
+The 1st, 2nd, 3rd hypotheses occur strictly before the conclusion.
+Abbreviations:
+aEk2Priv_1 = aEk2Priv[bSpkPub = pk(bSpkPriv[]),bSig = sign(pk(bSpkPriv[]),bIkPriv[])]
+aEk1Priv_1 = aEk1Priv[bSpkPub = pk(bSpkPriv[]),bSig = sign(pk(bSpkPriv[]),bIkPriv[])]
+@occ49_1 = @occ49[msg1Enc_1 = aead_enc(hkdf_ck(mac(hkdf_ck(G2B(dh(pk(aEk2Priv_1),bSpkPriv[])),hkdf_rk(hash3(G2B(dh(pk(aIkPriv[]),bSpkPriv[])),G2B(dh(pk(aEk1Priv_1),bIkPriv[])),G2B(dh(pk(aEk1Priv_1),bSpkPriv[]))),nil)),nil),nil),secret_msg[],hash3(G2B(pk(aIkPriv[])),G2B(pk(bIkPriv[])),G2B(pk(aEk2Priv_1)))),aEk2Pub_1 = pk(aEk2Priv_1),aEk1Pub_1 = pk(aEk1Priv_1)]
+@occ25_1 = @occ25[bSpkPub = pk(bSpkPriv[]),bSig = sign(pk(bSpkPriv[]),bIkPriv[])]
+RESULT inj-event(BobRiceve(pk(aIkPriv[]),m)) ==> inj-event(AliceInvia(pk(aIkPriv[]),m)) is true.
+
+--------------------------------------------------------------
+Verification summary:
+
+Query not attacker_p1(secret_msg[]) is false.
+
+Query inj-event(BobRiceve(pk(aIkPriv[]),m)) ==> inj-event(AliceInvia(pk(aIkPriv[]),m)) is true.
+
+--------------------------------------------------------------
+

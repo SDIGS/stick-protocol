@@ -1,0 +1,148 @@
+Process 0 (that is, the initial process):
+{1}new aChainKey: bitstring;
+{2}new aSigPriv: exponent;
+{3}let aSigPub: G = pk(aSigPriv) in
+{4}out(c, aSigPub);
+(
+    {5}let aChainKey_1: bitstring = aChainKey in
+    {6}let aSigPriv_1: exponent = aSigPriv in
+    {7}let aSigPub_1: G = pk(aSigPriv_1) in
+    {8}new ephAES1: bitstring;
+    {9}new ephMAC1: bitstring;
+    {10}let photoEnc1: bitstring = senc(photo1,ephAES1) in
+    {11}let photoMac1: bitstring = mac(photoEnc1,ephMAC1) in
+    {12}let blobSec1: bitstring = BlobData(ephAES1,ephMAC1,photoMac1) in
+    {13}let kdfInput1: bitstring = mac(aChainKey_1,nil) in
+    {14}let messageKey1: bitstring = hkdf_mk(kdfInput1,nil) in
+    {15}let chainKey2: bitstring = hkdf_ck(kdfInput1,nil) in
+    {16}let blobSecEnc1: bitstring = senc(blobSec1,messageKey1) in
+    {17}let blobSecSigned1: bitstring = sign(blobSecEnc1,aSigPriv_1) in
+    {18}event AliceInvia(photo1);
+    {19}out(c, (blobSecEnc1,blobSecSigned1,photoEnc1));
+    {20}new ephAES2: bitstring;
+    {21}new ephMAC2: bitstring;
+    {22}let photoEnc2: bitstring = senc(photo2,ephAES2) in
+    {23}let photoMac2: bitstring = mac(photoEnc2,ephMAC2) in
+    {24}let blobSec2: bitstring = BlobData(ephAES2,ephMAC2,photoMac2) in
+    {25}let kdfInput2: bitstring = mac(chainKey2,nil) in
+    {26}let messageKey2: bitstring = hkdf_mk(kdfInput2,nil) in
+    {27}let chainKey3: bitstring = hkdf_ck(kdfInput2,nil) in
+    {28}let blobSecEnc2: bitstring = senc(blobSec2,messageKey2) in
+    {29}let blobSecSigned2: bitstring = sign(blobSecEnc2,aSigPriv_1) in
+    {30}event AliceInvia(photo2);
+    {31}out(c, (blobSecEnc2,blobSecSigned2,photoEnc2));
+    {32}phase 1;
+    {33}out(c, chainKey3)
+) | (
+    {34}let aChainKey_2: bitstring = aChainKey in
+    {35}in(c, (blobSecEnc1_1: bitstring,blobSecSigned1_1: bitstring,photoEnc1_1: bitstring));
+    {36}let kdfInput1_1: bitstring = mac(aChainKey_2,nil) in
+    {37}let messageKey1_1: bitstring = hkdf_mk(kdfInput1_1,nil) in
+    {38}let chainKey2_1: bitstring = hkdf_ck(kdfInput1_1,nil) in
+    {39}if (checksign(blobSecSigned1_1,aSigPub) = blobSecEnc1_1) then
+    {40}let BlobData(ephAES1_1: bitstring,ephMAC1_1: bitstring,photoMac1_1: bitstring) = sdec(blobSecEnc1_1,messageKey1_1) in
+    {41}if (mac(photoEnc1_1,ephMAC1_1) = photoMac1_1) then
+    {42}let photoDec1: bitstring = sdec(photoEnc1_1,ephAES1_1) in
+    {43}event BobRiceve(photoDec1);
+    {44}in(c, (blobSecEnc2_1: bitstring,blobSecSigned2_1: bitstring,photoEnc2_1: bitstring));
+    {45}let kdfInput2_1: bitstring = mac(chainKey2_1,nil) in
+    {46}let messageKey2_1: bitstring = hkdf_mk(kdfInput2_1,nil) in
+    {47}let chainKey3_1: bitstring = hkdf_ck(kdfInput2_1,nil) in
+    {48}if (checksign(blobSecSigned2_1,aSigPub) = blobSecEnc2_1) then
+    {49}let BlobData(ephAES2_1: bitstring,ephMAC2_1: bitstring,photoMac2_1: bitstring) = sdec(blobSecEnc2_1,messageKey2_1) in
+    {50}if (mac(photoEnc2_1,ephMAC2_1) = photoMac2_1) then
+    {51}let photoDec2: bitstring = sdec(photoEnc2_1,ephAES2_1) in
+    {52}event BobRiceve(photoDec2)
+)
+
+--  Process 1 (that is, process 0, with let moved downwards):
+{1}new aChainKey: bitstring;
+{2}new aSigPriv: exponent;
+{3}let aSigPub: G = pk(aSigPriv) in
+{4}out(c, aSigPub);
+(
+    {8}new ephAES1: bitstring;
+    {9}new ephMAC1: bitstring;
+    {18}event AliceInvia(photo1);
+    {5}let aChainKey_1: bitstring = aChainKey in
+    {13}let kdfInput1: bitstring = mac(aChainKey_1,nil) in
+    {14}let messageKey1: bitstring = hkdf_mk(kdfInput1,nil) in
+    {10}let photoEnc1: bitstring = senc(photo1,ephAES1) in
+    {11}let photoMac1: bitstring = mac(photoEnc1,ephMAC1) in
+    {12}let blobSec1: bitstring = BlobData(ephAES1,ephMAC1,photoMac1) in
+    {16}let blobSecEnc1: bitstring = senc(blobSec1,messageKey1) in
+    {6}let aSigPriv_1: exponent = aSigPriv in
+    {17}let blobSecSigned1: bitstring = sign(blobSecEnc1,aSigPriv_1) in
+    {19}out(c, (blobSecEnc1,blobSecSigned1,photoEnc1));
+    {20}new ephAES2: bitstring;
+    {21}new ephMAC2: bitstring;
+    {30}event AliceInvia(photo2);
+    {15}let chainKey2: bitstring = hkdf_ck(kdfInput1,nil) in
+    {25}let kdfInput2: bitstring = mac(chainKey2,nil) in
+    {26}let messageKey2: bitstring = hkdf_mk(kdfInput2,nil) in
+    {22}let photoEnc2: bitstring = senc(photo2,ephAES2) in
+    {23}let photoMac2: bitstring = mac(photoEnc2,ephMAC2) in
+    {24}let blobSec2: bitstring = BlobData(ephAES2,ephMAC2,photoMac2) in
+    {28}let blobSecEnc2: bitstring = senc(blobSec2,messageKey2) in
+    {29}let blobSecSigned2: bitstring = sign(blobSecEnc2,aSigPriv_1) in
+    {31}out(c, (blobSecEnc2,blobSecSigned2,photoEnc2));
+    {32}phase 1;
+    {27}let chainKey3: bitstring = hkdf_ck(kdfInput2,nil) in
+    {33}out(c, chainKey3)
+) | (
+    {35}in(c, (blobSecEnc1_1: bitstring,blobSecSigned1_1: bitstring,photoEnc1_1: bitstring));
+    {39}if (checksign(blobSecSigned1_1,aSigPub) = blobSecEnc1_1) then
+    {34}let aChainKey_2: bitstring = aChainKey in
+    {36}let kdfInput1_1: bitstring = mac(aChainKey_2,nil) in
+    {37}let messageKey1_1: bitstring = hkdf_mk(kdfInput1_1,nil) in
+    {40}let BlobData(ephAES1_1: bitstring,ephMAC1_1: bitstring,photoMac1_1: bitstring) = sdec(blobSecEnc1_1,messageKey1_1) in
+    {41}if (mac(photoEnc1_1,ephMAC1_1) = photoMac1_1) then
+    {42}let photoDec1: bitstring = sdec(photoEnc1_1,ephAES1_1) in
+    {43}event BobRiceve(photoDec1);
+    {44}in(c, (blobSecEnc2_1: bitstring,blobSecSigned2_1: bitstring,photoEnc2_1: bitstring));
+    {48}if (checksign(blobSecSigned2_1,aSigPub) = blobSecEnc2_1) then
+    {38}let chainKey2_1: bitstring = hkdf_ck(kdfInput1_1,nil) in
+    {45}let kdfInput2_1: bitstring = mac(chainKey2_1,nil) in
+    {46}let messageKey2_1: bitstring = hkdf_mk(kdfInput2_1,nil) in
+    {49}let BlobData(ephAES2_1: bitstring,ephMAC2_1: bitstring,photoMac2_1: bitstring) = sdec(blobSecEnc2_1,messageKey2_1) in
+    {50}if (mac(photoEnc2_1,ephMAC2_1) = photoMac2_1) then
+    {51}let photoDec2: bitstring = sdec(photoEnc2_1,ephAES2_1) in
+    {52}event BobRiceve(photoDec2)
+)
+
+-- Query not attacker_p1(photo1[]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker_p1(photo1[])
+RESULT not attacker_p1(photo1[]) is true.
+-- Query not attacker_p1(photo2[]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker_p1(photo2[])
+RESULT not attacker_p1(photo2[]) is true.
+-- Query inj-event(BobRiceve(p)) ==> inj-event(AliceInvia(p)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+200 rules inserted. Base: 177 rules (48 with conclusion selected). Queue: 3 rules.
+Starting query inj-event(BobRiceve(p)) ==> inj-event(AliceInvia(p))
+goal reachable: b-inj-event(AliceInvia(photo2[]),@occ30[]) && b-event(@p_act(@occ44_2[],(senc(BlobData(ephAES2[],ephMAC2[],mac(senc(photo2[],ephAES2[]),ephMAC2[])),hkdf_mk(mac(hkdf_ck(mac(aChainKey[],nil),nil),nil),nil)),sign(senc(BlobData(ephAES2[],ephMAC2[],mac(senc(photo2[],ephAES2[]),ephMAC2[])),hkdf_mk(mac(hkdf_ck(mac(aChainKey[],nil),nil),nil),nil)),aSigPriv[]),senc(photo2[],ephAES2[])))) && b-inj-event(AliceInvia(photo1[]),@occ18[]) && b-event(@p_act(@occ35_2[],(senc(BlobData(ephAES1[],ephMAC1[],mac(senc(photo1[],ephAES1[]),ephMAC1[])),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES1[],ephMAC1[],mac(senc(photo1[],ephAES1[]),ephMAC1[])),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo1[],ephAES1[])))) -> inj-event(BobRiceve(photo2[]),@occ52_1)
+The 1st, 2nd, 3rd, 4th hypotheses occur strictly before the conclusion.
+Abbreviations:
+@occ52_1 = @occ52[photoEnc2_1 = senc(photo2[],ephAES2[]),blobSecSigned2_1 = sign(senc(BlobData(ephAES2[],ephMAC2[],mac(senc(photo2[],ephAES2[]),ephMAC2[])),hkdf_mk(mac(hkdf_ck(mac(aChainKey[],nil),nil),nil),nil)),aSigPriv[]),blobSecEnc2_1 = senc(BlobData(ephAES2[],ephMAC2[],mac(senc(photo2[],ephAES2[]),ephMAC2[])),hkdf_mk(mac(hkdf_ck(mac(aChainKey[],nil),nil),nil),nil)),photoEnc1_1 = senc(photo1[],ephAES1[]),blobSecSigned1_1 = sign(senc(BlobData(ephAES1[],ephMAC1[],mac(senc(photo1[],ephAES1[]),ephMAC1[])),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),blobSecEnc1_1 = senc(BlobData(ephAES1[],ephMAC1[],mac(senc(photo1[],ephAES1[]),ephMAC1[])),hkdf_mk(mac(aChainKey[],nil),nil))]
+goal reachable: b-inj-event(AliceInvia(photo1[]),@occ18[]) && b-event(@p_act(@occ35_2[],(senc(BlobData(ephAES1[],ephMAC1[],mac(senc(photo1[],ephAES1[]),ephMAC1[])),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES1[],ephMAC1[],mac(senc(photo1[],ephAES1[]),ephMAC1[])),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo1[],ephAES1[])))) -> inj-event(BobRiceve(photo1[]),@occ43_1)
+The 1st, 2nd hypotheses occur strictly before the conclusion.
+Abbreviations:
+@occ43_1 = @occ43[photoEnc1_1 = senc(photo1[],ephAES1[]),blobSecSigned1_1 = sign(senc(BlobData(ephAES1[],ephMAC1[],mac(senc(photo1[],ephAES1[]),ephMAC1[])),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),blobSecEnc1_1 = senc(BlobData(ephAES1[],ephMAC1[],mac(senc(photo1[],ephAES1[]),ephMAC1[])),hkdf_mk(mac(aChainKey[],nil),nil))]
+RESULT inj-event(BobRiceve(p)) ==> inj-event(AliceInvia(p)) is true.
+
+--------------------------------------------------------------
+Verification summary:
+
+Query not attacker_p1(photo1[]) is true.
+
+Query not attacker_p1(photo2[]) is true.
+
+Query inj-event(BobRiceve(p)) ==> inj-event(AliceInvia(p)) is true.
+
+--------------------------------------------------------------
+
