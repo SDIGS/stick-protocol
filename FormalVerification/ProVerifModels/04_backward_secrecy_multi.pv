@@ -13,6 +13,9 @@ const nil: bitstring.
 (* Il messaggio postY che vogliamo proteggere *)
 free postY: bitstring [private].
 
+(* Chiave di firma di Alice per la sessione Y, referenziabile nella query di autenticazione *)
+free aSigPrivY: exponent [private].
+
 (* --- 2. CRYPTOGRAPHIC PRIMITIVES --- *)
 fun pk(exponent): G.
 
@@ -27,13 +30,12 @@ fun senc(bitstring, bitstring): bitstring.
 reduc forall msg: bitstring, key: bitstring; sdec(senc(msg, key), key) = msg.
 
 (* --- 3. EVENTS E QUERIES --- *)
-event AliceInvia(bitstring).
-event BobRiceve(bitstring).
+event AliceInvia(G, bitstring).
+event BobRiceve(G, bitstring).
 
-(* Test di Backward Secrecy *)
 query attacker(postY).
-(* Autenticazione *)
-query m: bitstring; event(BobRiceve(m)) ==> event(AliceInvia(m)).
+
+query m: bitstring; inj-event(BobRiceve(pk(aSigPrivY), m)) ==> inj-event(AliceInvia(pk(aSigPrivY), m)).
 
 
 (* --- 4. ALICE'S PROCESS --- *)
@@ -47,21 +49,21 @@ let Alice(aChainKeyY: bitstring, aSigPrivY: exponent) =
     let postYEnc = senc(postY, messageKeyY) in
     let postYSigned = sign(postYEnc, aSigPrivY) in
     
-    event AliceInvia(postYEnc);
+    event AliceInvia(aSigPubY, postYEnc);
     out(c, (aSigPubY, postYEnc, postYSigned));
     0.
 
 (* --- 5. BOB'S PROCESS --- *)
-let Bob(aChainKeyY: bitstring) =
-    in(c, (aSigPubY: G, postYEnc: bitstring, postYSigned: bitstring));
-    
+let Bob(aChainKeyY: bitstring, aSigPubY: G) =
+    in(c, (=aSigPubY, postYEnc: bitstring, postYSigned: bitstring));
+
     let kdfInput = mac(aChainKeyY, nil) in
     let messageKeyYB = hkdf_mk(kdfInput, nil) in
-    
+
     if checksign(postYSigned, aSigPubY) = postYEnc then
     let postYDec = sdec(postYEnc, messageKeyYB) in
-    
-    event BobRiceve(postYEnc);
+
+    event BobRiceve(aSigPubY, postYEnc);
     0.
 
 
@@ -70,12 +72,13 @@ process
     (* La vecchia Chain Key (X) usata nel passato *)
     new aChainKeyX: bitstring;
     new aSigPrivX: exponent;
-    
-    (* L'attaccante ruba la vecchia Chain Key *)
+
+    (* --- PHASE 1: l'attaccante ruba la vecchia Chain Key --- *)
+    phase 1;
     out(c, aChainKeyX);
-    
+
     (* La nuova Chain Key (Y) ruotata *)
     new aChainKeyY: bitstring;
-    new aSigPrivY: exponent;
-    
-    ( !Alice(aChainKeyY, aSigPrivY) | !Bob(aChainKeyY) )
+    let aSigPubY = pk(aSigPrivY) in
+
+    ( !Alice(aChainKeyY, aSigPrivY) | !Bob(aChainKeyY, aSigPubY) )
