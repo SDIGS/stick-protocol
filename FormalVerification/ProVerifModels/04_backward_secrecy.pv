@@ -1,0 +1,81 @@
+(* Author: Diego Bertola *)
+(* ====================================================================
+   STICK PROTOCOL - 04_BACKWARD_SECRECY
+   ==================================================================== *)
+
+(* --- 1. INFRASTRUCTURE AND TYPES --- *)
+free c: channel.
+
+type exponent.
+type G.
+const nil: bitstring.
+
+(* Il messaggio postY che vogliamo proteggere *)
+free postY: bitstring [private].
+
+(* --- 2. CRYPTOGRAPHIC PRIMITIVES --- *)
+fun pk(exponent): G.
+
+fun sign(bitstring, exponent): bitstring.
+reduc forall m: bitstring, k: exponent; checksign(sign(m, k), pk(k)) = m.
+
+fun mac(bitstring, bitstring): bitstring.
+fun hkdf_ck(bitstring, bitstring): bitstring.
+fun hkdf_mk(bitstring, bitstring): bitstring.
+
+fun senc(bitstring, bitstring): bitstring.
+reduc forall msg: bitstring, key: bitstring; sdec(senc(msg, key), key) = msg.
+
+(* --- 3. EVENTS E QUERIES --- *)
+event AliceInvia(bitstring).
+event BobRiceve(bitstring).
+
+(* Test di Backward Secrecy *)
+query attacker(postY).
+(* Autenticazione *)
+query m: bitstring; event(BobRiceve(m)) ==> event(AliceInvia(m)).
+
+
+(* --- 4. ALICE'S PROCESS --- *)
+let Alice(aChainKeyY: bitstring, aSigPrivY: exponent) =
+    let aSigPubY = pk(aSigPrivY) in
+    
+    let kdfInput = mac(aChainKeyY, nil) in
+    let messageKeyY = hkdf_mk(kdfInput, nil) in
+    let aChainKeyY2 = hkdf_ck(kdfInput, nil) in
+    
+    let postYEnc = senc(postY, messageKeyY) in
+    let postYSigned = sign(postYEnc, aSigPrivY) in
+    
+    event AliceInvia(postYEnc);
+    out(c, (aSigPubY, postYEnc, postYSigned));
+    0.
+
+(* --- 5. BOB'S PROCESS --- *)
+let Bob(aChainKeyY: bitstring) =
+    in(c, (aSigPubY: G, postYEnc: bitstring, postYSigned: bitstring));
+    
+    let kdfInput = mac(aChainKeyY, nil) in
+    let messageKeyYB = hkdf_mk(kdfInput, nil) in
+    
+    if checksign(postYSigned, aSigPubY) = postYEnc then
+    let postYDec = sdec(postYEnc, messageKeyYB) in
+    
+    event BobRiceve(postYEnc);
+    0.
+
+
+(* --- 6. ENTRY POINT (MAIN) --- *)
+process
+    (* La vecchia Chain Key (X) usata nel passato *)
+    new aChainKeyX: bitstring;
+    new aSigPrivX: exponent;
+    
+    (* L'attaccante ruba la vecchia Chain Key *)
+    out(c, aChainKeyX);
+    
+    (* La nuova Chain Key (Y) ruotata *)
+    new aChainKeyY: bitstring;
+    new aSigPrivY: exponent;
+    
+    ( Alice(aChainKeyY, aSigPrivY) | Bob(aChainKeyY) )
