@@ -1,2 +1,74 @@
-File "05_malicious_no_explixit_server_pass.pv", line 59, character 13:
-Error: Syntax error.
+Process 0 (that is, the initial process):
+{1}new aChainKey: bitstring;
+{2}new aSigPriv: exponent;
+{3}let aSigPub: G = pk(aSigPriv) in
+(
+    {4}let aChainKey_1: bitstring = aChainKey in
+    {5}let aSigPriv_1: exponent = aSigPriv in
+    {6}let aSigPub_1: G = pk(aSigPriv_1) in
+    {7}let kdfInput: bitstring = mac(aChainKey_1,nil) in
+    {8}let chainKey2: bitstring = hkdf_ck(kdfInput,nil) in
+    {9}let messageKey: bitstring = hkdf_mk(kdfInput,nil) in
+    {10}let postEnc: bitstring = senc(post,messageKey) in
+    {11}let postSigned: bitstring = sign(postEnc,aSigPriv_1) in
+    {12}event AliceInvia(aSigPub_1,post);
+    {13}out(c, (aSigPub_1,postEnc,postSigned))
+) | (
+    {14}let aChainKey_2: bitstring = aChainKey in
+    {15}in(c, (=aSigPub,postEnc_1: bitstring,postSigned_1: bitstring));
+    {16}if (checksign(postSigned_1,aSigPub) = postEnc_1) then
+    {17}let kdfInput_1: bitstring = mac(aChainKey_2,nil) in
+    {18}let chainKey2_1: bitstring = hkdf_ck(kdfInput_1,nil) in
+    {19}let messageKey_1: bitstring = hkdf_mk(kdfInput_1,nil) in
+    {20}let postDec: bitstring = sdec(postEnc_1,messageKey_1) in
+    {21}event BobRiceve(aSigPub,postDec)
+)
+
+--  Process 1 (that is, process 0, with let moved downwards):
+{1}new aChainKey: bitstring;
+{2}new aSigPriv: exponent;
+(
+    {5}let aSigPriv_1: exponent = aSigPriv in
+    {6}let aSigPub_1: G = pk(aSigPriv_1) in
+    {12}event AliceInvia(aSigPub_1,post);
+    {4}let aChainKey_1: bitstring = aChainKey in
+    {7}let kdfInput: bitstring = mac(aChainKey_1,nil) in
+    {9}let messageKey: bitstring = hkdf_mk(kdfInput,nil) in
+    {10}let postEnc: bitstring = senc(post,messageKey) in
+    {11}let postSigned: bitstring = sign(postEnc,aSigPriv_1) in
+    {13}out(c, (aSigPub_1,postEnc,postSigned))
+) | (
+    {3}let aSigPub: G = pk(aSigPriv) in
+    {15}in(c, (=aSigPub,postEnc_1: bitstring,postSigned_1: bitstring));
+    {16}if (checksign(postSigned_1,aSigPub) = postEnc_1) then
+    {14}let aChainKey_2: bitstring = aChainKey in
+    {17}let kdfInput_1: bitstring = mac(aChainKey_2,nil) in
+    {19}let messageKey_1: bitstring = hkdf_mk(kdfInput_1,nil) in
+    {20}let postDec: bitstring = sdec(postEnc_1,messageKey_1) in
+    {21}event BobRiceve(aSigPub,postDec)
+)
+
+-- Query not attacker(post[]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker(post[])
+RESULT not attacker(post[]) is true.
+-- Query inj-event(BobRiceve(pub,m)) ==> inj-event(AliceInvia(pub,m)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(BobRiceve(pub,m)) ==> inj-event(AliceInvia(pub,m))
+goal reachable: b-inj-event(AliceInvia(pk(aSigPriv[]),post[]),@occ12[]) -> inj-event(BobRiceve(pk(aSigPriv[]),post[]),@occ21_1)
+The hypothesis occurs strictly before the conclusion.
+Abbreviations:
+@occ21_1 = @occ21[postSigned_1 = sign(senc(post[],hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),postEnc_1 = senc(post[],hkdf_mk(mac(aChainKey[],nil),nil))]
+RESULT inj-event(BobRiceve(pub,m)) ==> inj-event(AliceInvia(pub,m)) is true.
+
+--------------------------------------------------------------
+Verification summary:
+
+Query not attacker(post[]) is true.
+
+Query inj-event(BobRiceve(pub,m)) ==> inj-event(AliceInvia(pub,m)) is true.
+
+--------------------------------------------------------------
+
