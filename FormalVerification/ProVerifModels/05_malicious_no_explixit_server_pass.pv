@@ -1,6 +1,6 @@
 (* Author: Diego Bertola *)
 (* ====================================================================
-   STICK PROTOCOL - 02_STICKY_SESSION
+   STICK PROTOCOL - 05_MALICIOUS_NO_EXPLICIT_SERVER
    ==================================================================== *)
 
 (* --- 1. INFRASTRUCTURE AND TYPES --- *)
@@ -37,14 +37,14 @@ reduc forall m: bitstring, k: exponent; checksign(sign(m, k), pk(k)) = m.
 
 
 (* --- 3. EVENTS & QUERIES --- *)
-event AliceInvia(bitstring).
-event BobRiceve(bitstring).
+event AliceInvia(G, bitstring).
+event BobRiceve(G, bitstring).
 
 (* Confidentiality query for the post *)
 query attacker(post).
 
 (* Authentication queries for the post *)
-query m: bitstring; inj-event(BobRiceve(post)) ==> inj-event(AliceInvia(post)).
+query m: bitstring, pub: G; inj-event(BobRiceve(pub, m)) ==> inj-event(AliceInvia(pub, m)).
 
 
 (* --- 4. ALICE'S PROCESS --- *)
@@ -59,14 +59,14 @@ let Alice(aChainKey: bitstring, aSigPriv: exponent) =
     let postEnc = senc(post, messageKey) in
     let postSigned = sign(postEnc, aSigPriv) in   
  
-    event AliceInvia(post);
+    event AliceInvia(aSigPub, post);
     out(c, (aSigPub, postEnc, postSigned));
     0.
 
 
 (* --- 5. BOB'S PROCESS --- *)
-let Bob(aChainKey: bitstring) =
-    in(c, (aSigPub: G, postEnc: bitstring, postSigned: bitstring));
+let Bob(aChainKey: bitstring, aSigPub: G) =
+    in(c, (=aSigPub, postEnc: bitstring, postSigned: bitstring));
 
     if checksign(postSigned, aSigPub) = postEnc then
 
@@ -76,7 +76,7 @@ let Bob(aChainKey: bitstring) =
 
     let postDec = sdec(postEnc, messageKey) in
 
-    event BobRiceve(postDec);
+    event BobRiceve(aSigPub, postDec);
     0.
 
 
@@ -84,5 +84,6 @@ let Bob(aChainKey: bitstring) =
 process
     new aChainKey: bitstring;
     new aSigPriv: exponent;
+    let aSigPub = pk(aSigPriv) in
 
-    ( !Alice(aChainKey, aSigPriv) | !Bob(aChainKey) )
+    ( Alice(aChainKey, aSigPriv) | Bob(aChainKey, aSigPub) )
