@@ -27,7 +27,6 @@ not attacker(bSpkPriv) phase 0.
 nounif x: exponent, y: G; attacker(dh(y, x)) / -5000.
 
 (* --- 2. DIFFIE-HELLMAN --- *)
-const g: G.
 fun pk(exponent): G.
 fun dh(G, exponent): G.
 equation forall x: exponent, y: exponent; 
