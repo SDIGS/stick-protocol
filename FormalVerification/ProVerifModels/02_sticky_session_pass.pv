@@ -14,7 +14,6 @@ type G.
 type counter.
 
 const nil: bitstring.
-const g: G.
 fun pk(exponent): G.
 
 (* --- 2. CRYPTOGRAPHIC PRIMITIVES --- *)

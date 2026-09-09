@@ -221,7 +221,7 @@ RESULT not attacker(alicePass2[]) is true.
 -- Query inj-event(Device2Downloads(k)) ==> inj-event(Device1Uploads(k)) in process 1.
 Translating the process into Horn clauses...
 Completing...
-200 rules inserted. Base: 200 rules (52 with conclusion selected). Queue: 14 rules.
+200 rules inserted. Base: 200 rules (51 with conclusion selected). Queue: 13 rules.
 Starting query inj-event(Device2Downloads(k)) ==> inj-event(Device1Uploads(k))
 goal reachable: attacker(ikPub_3) && attacker(spkPub_3) && b-inj-event(Device1Uploads(ikPriv[]),@occ15_1) && attacker(opkPub_3) -> inj-event(Device2Downloads(opkPriv[]),@occ27_1)
 Abbreviations:

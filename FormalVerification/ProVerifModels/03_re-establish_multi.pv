@@ -16,7 +16,6 @@ free opkPriv: exponent [private].
 free alicePass: bitstring [private].
 free alicePass2: bitstring [private].
 
-const g: G.
 
 
 (* --- 2. CRYPTOGRAPHIC PRIMITIVES --- *)

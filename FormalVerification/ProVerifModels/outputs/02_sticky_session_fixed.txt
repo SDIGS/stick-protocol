@@ -63,9 +63,9 @@ Process 0 (that is, the initial process):
         {56}event CharlieRiceve(photoDec_1,msgCounter_2)
 )
 
-File "/home/sdigs/unito/tesi/additional_works/01_formal_verification_Proverif/02_sticky_session_fixed.pv", line 62, character 21:
+File "02_sticky_session_fixed.pv", line 61, character 21:
 Warning: identifier c rebound.
-File "/home/sdigs/unito/tesi/additional_works/01_formal_verification_Proverif/02_sticky_session_fixed.pv", line 63, character 21:
+File "02_sticky_session_fixed.pv", line 62, character 21:
 Warning: identifier c rebound.
 --  Process 1 (that is, process 0, with let moved downwards):
 {1}new aChainKey: bitstring;

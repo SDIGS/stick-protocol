@@ -123,7 +123,7 @@ RESULT not attacker_p1(photo2[]) is true.
 -- Query inj-event(BobRiceve(p)) ==> inj-event(AliceInvia(p)) in process 1.
 Translating the process into Horn clauses...
 Completing...
-200 rules inserted. Base: 177 rules (48 with conclusion selected). Queue: 3 rules.
+200 rules inserted. Base: 177 rules (46 with conclusion selected). Queue: 2 rules.
 Starting query inj-event(BobRiceve(p)) ==> inj-event(AliceInvia(p))
 goal reachable: b-inj-event(AliceInvia(photo2[]),@occ30[]) && b-event(@p_act(@occ44_2[],(senc(BlobData(ephAES2[],ephMAC2[],mac(senc(photo2[],ephAES2[]),ephMAC2[])),hkdf_mk(mac(hkdf_ck(mac(aChainKey[],nil),nil),nil),nil)),sign(senc(BlobData(ephAES2[],ephMAC2[],mac(senc(photo2[],ephAES2[]),ephMAC2[])),hkdf_mk(mac(hkdf_ck(mac(aChainKey[],nil),nil),nil),nil)),aSigPriv[]),senc(photo2[],ephAES2[])))) && b-inj-event(AliceInvia(photo1[]),@occ18[]) && b-event(@p_act(@occ35_2[],(senc(BlobData(ephAES1[],ephMAC1[],mac(senc(photo1[],ephAES1[]),ephMAC1[])),hkdf_mk(mac(aChainKey[],nil),nil)),sign(senc(BlobData(ephAES1[],ephMAC1[],mac(senc(photo1[],ephAES1[]),ephMAC1[])),hkdf_mk(mac(aChainKey[],nil),nil)),aSigPriv[]),senc(photo1[],ephAES1[])))) -> inj-event(BobRiceve(photo2[]),@occ52_1)
 The 1st, 2nd, 3rd, 4th hypotheses occur strictly before the conclusion.

@@ -117,19 +117,19 @@ Declared: select attacker_p1(dh(y,x))/5000
 -- Query not attacker_p1(secret_msg[]) in process 1.
 Translating the process into Horn clauses...
 Completing...
-200 rules inserted. Base: 177 rules (56 with conclusion selected). Queue: 54 rules.
-400 rules inserted. Base: 321 rules (81 with conclusion selected). Queue: 112 rules.
-600 rules inserted. Base: 457 rules (81 with conclusion selected). Queue: 112 rules.
-800 rules inserted. Base: 657 rules (113 with conclusion selected). Queue: 96 rules.
-1000 rules inserted. Base: 857 rules (113 with conclusion selected). Queue: 128 rules.
-1200 rules inserted. Base: 1057 rules (113 with conclusion selected). Queue: 182 rules.
-1400 rules inserted. Base: 1257 rules (113 with conclusion selected). Queue: 251 rules.
-1600 rules inserted. Base: 1457 rules (113 with conclusion selected). Queue: 312 rules.
-1800 rules inserted. Base: 1654 rules (113 with conclusion selected). Queue: 297 rules.
-2000 rules inserted. Base: 1853 rules (113 with conclusion selected). Queue: 271 rules.
-2200 rules inserted. Base: 2035 rules (113 with conclusion selected). Queue: 181 rules.
-2400 rules inserted. Base: 2187 rules (113 with conclusion selected). Queue: 81 rules.
-2600 rules inserted. Base: 2199 rules (113 with conclusion selected). Queue: 17 rules.
+200 rules inserted. Base: 173 rules (52 with conclusion selected). Queue: 54 rules.
+400 rules inserted. Base: 321 rules (77 with conclusion selected). Queue: 112 rules.
+600 rules inserted. Base: 457 rules (77 with conclusion selected). Queue: 112 rules.
+800 rules inserted. Base: 657 rules (109 with conclusion selected). Queue: 96 rules.
+1000 rules inserted. Base: 857 rules (109 with conclusion selected). Queue: 130 rules.
+1200 rules inserted. Base: 1057 rules (109 with conclusion selected). Queue: 184 rules.
+1400 rules inserted. Base: 1257 rules (109 with conclusion selected). Queue: 251 rules.
+1600 rules inserted. Base: 1457 rules (109 with conclusion selected). Queue: 313 rules.
+1800 rules inserted. Base: 1654 rules (109 with conclusion selected). Queue: 300 rules.
+2000 rules inserted. Base: 1853 rules (109 with conclusion selected). Queue: 270 rules.
+2200 rules inserted. Base: 2035 rules (109 with conclusion selected). Queue: 180 rules.
+2400 rules inserted. Base: 2178 rules (109 with conclusion selected). Queue: 79 rules.
+2600 rules inserted. Base: 2195 rules (109 with conclusion selected). Queue: 17 rules.
 ok, secrecy assumption verified: fact unreachable attacker(aIkPriv[])
 ok, secrecy assumption verified: fact unreachable attacker(bIkPriv[])
 ok, secrecy assumption verified: fact unreachable attacker(bSpkPriv[])
@@ -376,37 +376,37 @@ Declared: select attacker_p1(dh(y,x))/5000
 -- Query inj-event(BobRiceve(pk(aIkPriv[]),m)) ==> inj-event(AliceInvia(pk(aIkPriv[]),m)) in process 1.
 Translating the process into Horn clauses...
 Completing...
-200 rules inserted. Base: 190 rules (51 with conclusion selected). Queue: 135 rules.
-400 rules inserted. Base: 269 rules (56 with conclusion selected). Queue: 130 rules.
-600 rules inserted. Base: 435 rules (136 with conclusion selected). Queue: 225 rules.
-800 rules inserted. Base: 570 rules (216 with conclusion selected). Queue: 144 rules.
-1000 rules inserted. Base: 710 rules (216 with conclusion selected). Queue: 145 rules.
-1200 rules inserted. Base: 874 rules (255 with conclusion selected). Queue: 118 rules.
-1400 rules inserted. Base: 1074 rules (264 with conclusion selected). Queue: 94 rules.
-1600 rules inserted. Base: 1274 rules (264 with conclusion selected). Queue: 142 rules.
-1800 rules inserted. Base: 1474 rules (264 with conclusion selected). Queue: 199 rules.
-2000 rules inserted. Base: 1674 rules (264 with conclusion selected). Queue: 273 rules.
-2200 rules inserted. Base: 1874 rules (264 with conclusion selected). Queue: 369 rules.
-2400 rules inserted. Base: 2063 rules (264 with conclusion selected). Queue: 450 rules.
-2600 rules inserted. Base: 2240 rules (264 with conclusion selected). Queue: 508 rules.
-2800 rules inserted. Base: 2416 rules (264 with conclusion selected). Queue: 568 rules.
-3000 rules inserted. Base: 2583 rules (264 with conclusion selected). Queue: 591 rules.
-3200 rules inserted. Base: 2751 rules (264 with conclusion selected). Queue: 627 rules.
-3400 rules inserted. Base: 2901 rules (264 with conclusion selected). Queue: 650 rules.
-3600 rules inserted. Base: 3034 rules (264 with conclusion selected). Queue: 680 rules.
-3800 rules inserted. Base: 3167 rules (264 with conclusion selected). Queue: 710 rules.
-4000 rules inserted. Base: 3264 rules (264 with conclusion selected). Queue: 723 rules.
-4200 rules inserted. Base: 3323 rules (264 with conclusion selected). Queue: 702 rules.
-4400 rules inserted. Base: 3401 rules (264 with conclusion selected). Queue: 668 rules.
-4600 rules inserted. Base: 3468 rules (264 with conclusion selected). Queue: 632 rules.
-4800 rules inserted. Base: 3421 rules (264 with conclusion selected). Queue: 570 rules.
-5000 rules inserted. Base: 3376 rules (264 with conclusion selected). Queue: 489 rules.
-5200 rules inserted. Base: 3363 rules (264 with conclusion selected). Queue: 416 rules.
-5400 rules inserted. Base: 3409 rules (264 with conclusion selected). Queue: 299 rules.
-5600 rules inserted. Base: 3438 rules (264 with conclusion selected). Queue: 180 rules.
-5800 rules inserted. Base: 3499 rules (264 with conclusion selected). Queue: 86 rules.
-6000 rules inserted. Base: 3636 rules (264 with conclusion selected). Queue: 72 rules.
-6200 rules inserted. Base: 3525 rules (278 with conclusion selected). Queue: 89 rules.
+200 rules inserted. Base: 190 rules (47 with conclusion selected). Queue: 135 rules.
+400 rules inserted. Base: 265 rules (52 with conclusion selected). Queue: 130 rules.
+600 rules inserted. Base: 435 rules (132 with conclusion selected). Queue: 225 rules.
+800 rules inserted. Base: 570 rules (212 with conclusion selected). Queue: 144 rules.
+1000 rules inserted. Base: 708 rules (212 with conclusion selected). Queue: 144 rules.
+1200 rules inserted. Base: 874 rules (254 with conclusion selected). Queue: 116 rules.
+1400 rules inserted. Base: 1074 rules (260 with conclusion selected). Queue: 95 rules.
+1600 rules inserted. Base: 1274 rules (260 with conclusion selected). Queue: 143 rules.
+1800 rules inserted. Base: 1474 rules (260 with conclusion selected). Queue: 199 rules.
+2000 rules inserted. Base: 1674 rules (260 with conclusion selected). Queue: 275 rules.
+2200 rules inserted. Base: 1874 rules (260 with conclusion selected). Queue: 369 rules.
+2400 rules inserted. Base: 2063 rules (260 with conclusion selected). Queue: 451 rules.
+2600 rules inserted. Base: 2239 rules (260 with conclusion selected). Queue: 511 rules.
+2800 rules inserted. Base: 2416 rules (260 with conclusion selected). Queue: 569 rules.
+3000 rules inserted. Base: 2583 rules (260 with conclusion selected). Queue: 594 rules.
+3200 rules inserted. Base: 2750 rules (260 with conclusion selected). Queue: 631 rules.
+3400 rules inserted. Base: 2901 rules (260 with conclusion selected). Queue: 652 rules.
+3600 rules inserted. Base: 3033 rules (260 with conclusion selected). Queue: 679 rules.
+3800 rules inserted. Base: 3167 rules (260 with conclusion selected). Queue: 711 rules.
+4000 rules inserted. Base: 3264 rules (260 with conclusion selected). Queue: 722 rules.
+4200 rules inserted. Base: 3318 rules (260 with conclusion selected). Queue: 702 rules.
+4400 rules inserted. Base: 3401 rules (260 with conclusion selected). Queue: 668 rules.
+4600 rules inserted. Base: 3462 rules (260 with conclusion selected). Queue: 630 rules.
+4800 rules inserted. Base: 3418 rules (260 with conclusion selected). Queue: 569 rules.
+5000 rules inserted. Base: 3372 rules (260 with conclusion selected). Queue: 488 rules.
+5200 rules inserted. Base: 3360 rules (260 with conclusion selected). Queue: 415 rules.
+5400 rules inserted. Base: 3409 rules (260 with conclusion selected). Queue: 298 rules.
+5600 rules inserted. Base: 3438 rules (260 with conclusion selected). Queue: 176 rules.
+5800 rules inserted. Base: 3499 rules (260 with conclusion selected). Queue: 85 rules.
+6000 rules inserted. Base: 3635 rules (260 with conclusion selected). Queue: 72 rules.
+6200 rules inserted. Base: 3522 rules (274 with conclusion selected). Queue: 94 rules.
 ok, secrecy assumption verified: fact unreachable attacker(aIkPriv[])
 ok, secrecy assumption verified: fact unreachable attacker(bIkPriv[])
 ok, secrecy assumption verified: fact unreachable attacker(bSpkPriv[])

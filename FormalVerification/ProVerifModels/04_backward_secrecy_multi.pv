@@ -71,7 +71,6 @@ let Bob(aChainKeyY: bitstring, aSigPubY: G) =
 process
     (* La vecchia Chain Key (X) usata nel passato *)
     new aChainKeyX: bitstring;
-    new aSigPrivX: exponent;
 
     (* --- PHASE 1: l'attaccante ruba la vecchia Chain Key --- *)
     phase 1;

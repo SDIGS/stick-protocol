@@ -16,7 +16,6 @@ type counter.
 (* Global constant to represent Verifpal's "nil" parameters *)
 const nil: bitstring.
 
-const g: G.
 fun pk(exponent): G.
 
 (* --- 2. CRYPTOGRAPHIC PRIMITIVES --- *)
