@@ -113,7 +113,11 @@ can be run as follows:
 ```
 verifpal verify test_file.vp
 ```
-Tests 01->04 are expected to pass, while test 05 is expected to fail.
+Tests 01->04 are expected to pass, while `05_malicious.vp` is expected to fail.
+
+`05_malicious_no_explixit_server_pass.vp` was added in this fork and is expected to pass. It covers the same scenario as
+`05_malicious.vp`, but without a server principal scripted to tamper with the message: there the signature check cannot
+do anything other than fail, so the test never gets to say anything about the protocol. See [NOTICE.md](./NOTICE.md).
 
 ## License
 
@@ -121,4 +125,4 @@ Copyright © 2018-2024 <a href="https://www.sticknet.org">Sticknet</a>
 
 Licensed under the GPLv3: http://www.gnu.org/licenses/gpl-3.0.html
 
-See [NOTICE.md](NOTICE.md) for attribution of the formal-verification work added in this fork.
+See [NOTICE.md](./NOTICE.md) for attribution of work added in this fork.
