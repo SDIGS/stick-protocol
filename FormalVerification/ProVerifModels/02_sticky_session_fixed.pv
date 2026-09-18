@@ -1,4 +1,4 @@
-(* Author: Diego Bertola, CORRETTO IN FASE DI AUDIT *)
+(* Author: Diego Bertola, CORRECTED DURING AUDIT *)
 (* ====================================================================
    STICK PROTOCOL - 02_STICKY_SESSION (FIXED)
    ==================================================================== *)
@@ -35,9 +35,9 @@ reduc forall msg: bitstring, k: bitstring; sdec(senc(msg, k), k) = msg.
 fun sign(bitstring, exponent): bitstring.
 reduc forall m: bitstring, k: exponent; checksign(sign(m, k), pk(k)) = m.
 
-(* Ogni destinatario tiene il proprio stato locale di replay-detection,
-   indipendente dagli altri membri del gruppo (coerente con la realtà:
-   ogni device ha il proprio DB locale) *)
+(* Each recipient keeps its own local replay-detection state, independent of
+   the other group members (consistent with the real implementation, where
+   every device has its own local database) *)
 free mutex_lock_bob: channel [private].
 free mutex_lock_charlie: channel [private].
 table seen_counters_bob(counter).
@@ -68,12 +68,12 @@ let Alice(aChainKey: bitstring, aSigPriv: exponent) =
 
     new ephAES: bitstring;
     new ephMAC: bitstring;
-    new msgCounter: counter; (* Simula l'iteratore del Sender Key Protocol *)
+    new msgCounter: counter; (* Simulates the Sender Key Protocol iterator *)
 
     let photoEnc = senc(photo, ephAES) in
     let photoMac = mac(photoEnc, ephMAC) in
     
-    (* Il counter viene firmato indirettamente inserendolo nel blobSec *)
+    (* The counter is signed indirectly, by embedding it in blobSec *)
     let blobSec = BlobData(ephAES, ephMAC, photoMac, msgCounter) in
 
     (* KDF to derive the next chain key and the current message key *)
@@ -102,7 +102,7 @@ let Bob(aChainKey: bitstring, aSigPub: G) =
 
     if checksign(blobSecSigned, aSigPub) = blobSecEnc then
     
-    (* Estrazione del counter *)
+    (* Counter extraction *)
     let BlobData(ephAES, ephMAC, photoMac, msgCounter) = sdec(blobSecEnc, messageKey) in
     
     if mac(photoEnc, ephMAC) = photoMac then
@@ -150,7 +150,7 @@ process
     let aSigPub = pk(aSigPriv) in
     out(c, aSigPub);
 
-    (* Inizializza i Mutex per impedire le race condition, uno per destinatario *)
+    (* Initialise the mutexes that prevent race conditions, one per recipient *)
     out(mutex_lock_bob, nil);
     out(mutex_lock_charlie, nil);
 

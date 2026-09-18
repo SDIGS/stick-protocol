@@ -22,7 +22,7 @@ free alicePass2: bitstring [private].
 
 fun pk(exponent): G.
 
-(* Funzione di Hash crittografico *)
+(* Cryptographic hash function *)
 fun pw_hash(bitstring): bitstring.
 
 fun senc(bitstring, bitstring): bitstring.
@@ -33,8 +33,8 @@ reduc forall msg: bitstring, key: bitstring;
 fun exp2b(exponent): bitstring.
 reduc forall x: exponent; b2exp(exp2b(x)) = x.
 
-(* alicePass/alicePass2 sono password umane, non segreti ad alta entropia:
-   testiamo anche il guessing attack offline, non solo la derivazione diretta *)
+(* alicePass/alicePass2 are human passwords, not high-entropy secrets: we also
+   test the offline guessing attack, not only the direct derivation *)
 weaksecret alicePass.
 weaksecret alicePass2.
 
