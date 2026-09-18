@@ -1,60 +1,151 @@
 Process 0 (that is, the initial process):
 {1}new aChainKeyX: bitstring;
-{2}phase 1;
-{3}out(c, aChainKeyX);
-{4}new aChainKeyY: bitstring;
-{5}let aSigPubY: G = pk(aSigPrivY) in
+{2}new aSigPrivX: exponent;
+{3}new aChainKeyY: bitstring;
+{4}let aSigPubY: G = pk(aSigPrivY) in
 (
-    {6}!
-    {7}let aChainKeyY_1: bitstring = aChainKeyY in
-    {8}let aSigPrivY_1: exponent = aSigPrivY in
-    {9}let aSigPubY_1: G = pk(aSigPrivY_1) in
-    {10}let kdfInput: bitstring = mac(aChainKeyY_1,nil) in
-    {11}let messageKeyY: bitstring = hkdf_mk(kdfInput,nil) in
-    {12}let aChainKeyY2: bitstring = hkdf_ck(kdfInput,nil) in
-    {13}let postYEnc: bitstring = senc(postY,messageKeyY) in
-    {14}let postYSigned: bitstring = sign(postYEnc,aSigPrivY_1) in
-    {15}event AliceInvia(aSigPubY_1,postYEnc);
-    {16}out(c, (aSigPubY_1,postYEnc,postYSigned))
+    {5}!
+    {6}let aChainKeyX_1: bitstring = aChainKeyX in
+    {7}let aSigPrivX_1: exponent = aSigPrivX in
+    {8}let aChainKeyY_1: bitstring = aChainKeyY in
+    {9}let aSigPrivY_1: exponent = aSigPrivY in
+    {10}let kdfInputX: bitstring = mac(aChainKeyX_1,nil) in
+    {11}let messageKeyX: bitstring = hkdf_mk(kdfInputX,nil) in
+    {12}let postXEnc: bitstring = senc(postX,messageKeyX) in
+    {13}let postXSigned: bitstring = sign(postXEnc,aSigPrivX_1) in
+    {14}out(c, (pk(aSigPrivX_1),postXEnc,postXSigned));
+    {15}phase 1;
+    {16}out(c, aChainKeyX_1);
+    {17}let aSigPubY_1: G = pk(aSigPrivY_1) in
+    {18}let kdfInputY: bitstring = mac(aChainKeyY_1,nil) in
+    {19}let messageKeyY: bitstring = hkdf_mk(kdfInputY,nil) in
+    {20}let aChainKeyY2: bitstring = hkdf_ck(kdfInputY,nil) in
+    {21}let postYEnc: bitstring = senc(postY,messageKeyY) in
+    {22}let postYSigned: bitstring = sign(postYEnc,aSigPrivY_1) in
+    {23}event AliceInvia(aSigPubY_1,postYEnc);
+    {24}out(c, (aSigPubY_1,postYEnc,postYSigned))
 ) | (
-    {17}!
-    {18}let aChainKeyY_2: bitstring = aChainKeyY in
-    {19}in(c, (=aSigPubY,postYEnc_1: bitstring,postYSigned_1: bitstring));
-    {20}let kdfInput_1: bitstring = mac(aChainKeyY_2,nil) in
-    {21}let messageKeyYB: bitstring = hkdf_mk(kdfInput_1,nil) in
-    {22}if (checksign(postYSigned_1,aSigPubY) = postYEnc_1) then
-    {23}let postYDec: bitstring = sdec(postYEnc_1,messageKeyYB) in
-    {24}event BobRiceve(aSigPubY,postYEnc_1)
+    {25}!
+    {26}let aChainKeyY_2: bitstring = aChainKeyY in
+    {27}phase 1;
+    {28}in(c, (=aSigPubY,postYEnc_1: bitstring,postYSigned_1: bitstring));
+    {29}let kdfInput: bitstring = mac(aChainKeyY_2,nil) in
+    {30}let messageKeyYB: bitstring = hkdf_mk(kdfInput,nil) in
+    {31}if (checksign(postYSigned_1,aSigPubY) = postYEnc_1) then
+    {32}let postYDec: bitstring = sdec(postYEnc_1,messageKeyYB) in
+    {33}event BobRiceve(aSigPubY,postYEnc_1)
 )
 
 --  Process 1 (that is, process 0, with let moved downwards):
 {1}new aChainKeyX: bitstring;
-{2}phase 1;
-{3}out(c, aChainKeyX);
-{4}new aChainKeyY: bitstring;
+{2}new aSigPrivX: exponent;
+{3}new aChainKeyY: bitstring;
 (
-    {6}!
-    {7}let aChainKeyY_1: bitstring = aChainKeyY in
-    {10}let kdfInput: bitstring = mac(aChainKeyY_1,nil) in
-    {11}let messageKeyY: bitstring = hkdf_mk(kdfInput,nil) in
-    {13}let postYEnc: bitstring = senc(postY,messageKeyY) in
-    {8}let aSigPrivY_1: exponent = aSigPrivY in
-    {9}let aSigPubY_1: G = pk(aSigPrivY_1) in
-    {15}event AliceInvia(aSigPubY_1,postYEnc);
-    {14}let postYSigned: bitstring = sign(postYEnc,aSigPrivY_1) in
-    {16}out(c, (aSigPubY_1,postYEnc,postYSigned))
+    {5}!
+    {6}let aChainKeyX_1: bitstring = aChainKeyX in
+    {10}let kdfInputX: bitstring = mac(aChainKeyX_1,nil) in
+    {11}let messageKeyX: bitstring = hkdf_mk(kdfInputX,nil) in
+    {12}let postXEnc: bitstring = senc(postX,messageKeyX) in
+    {7}let aSigPrivX_1: exponent = aSigPrivX in
+    {13}let postXSigned: bitstring = sign(postXEnc,aSigPrivX_1) in
+    {14}out(c, (pk(aSigPrivX_1),postXEnc,postXSigned));
+    {15}phase 1;
+    {16}out(c, aChainKeyX_1);
+    {8}let aChainKeyY_1: bitstring = aChainKeyY in
+    {18}let kdfInputY: bitstring = mac(aChainKeyY_1,nil) in
+    {19}let messageKeyY: bitstring = hkdf_mk(kdfInputY,nil) in
+    {21}let postYEnc: bitstring = senc(postY,messageKeyY) in
+    {9}let aSigPrivY_1: exponent = aSigPrivY in
+    {17}let aSigPubY_1: G = pk(aSigPrivY_1) in
+    {23}event AliceInvia(aSigPubY_1,postYEnc);
+    {22}let postYSigned: bitstring = sign(postYEnc,aSigPrivY_1) in
+    {24}out(c, (aSigPubY_1,postYEnc,postYSigned))
 ) | (
-    {17}!
-    {5}let aSigPubY: G = pk(aSigPrivY) in
-    {19}in(c, (=aSigPubY,postYEnc_1: bitstring,postYSigned_1: bitstring));
-    {22}if (checksign(postYSigned_1,aSigPubY) = postYEnc_1) then
-    {18}let aChainKeyY_2: bitstring = aChainKeyY in
-    {20}let kdfInput_1: bitstring = mac(aChainKeyY_2,nil) in
-    {21}let messageKeyYB: bitstring = hkdf_mk(kdfInput_1,nil) in
-    {23}let postYDec: bitstring = sdec(postYEnc_1,messageKeyYB) in
-    {24}event BobRiceve(aSigPubY,postYEnc_1)
+    {25}!
+    {27}phase 1;
+    {4}let aSigPubY: G = pk(aSigPrivY) in
+    {28}in(c, (=aSigPubY,postYEnc_1: bitstring,postYSigned_1: bitstring));
+    {31}if (checksign(postYSigned_1,aSigPubY) = postYEnc_1) then
+    {26}let aChainKeyY_2: bitstring = aChainKeyY in
+    {29}let kdfInput: bitstring = mac(aChainKeyY_2,nil) in
+    {30}let messageKeyYB: bitstring = hkdf_mk(kdfInput,nil) in
+    {32}let postYDec: bitstring = sdec(postYEnc_1,messageKeyYB) in
+    {33}event BobRiceve(aSigPubY,postYEnc_1)
 )
 
+-- Query not attacker_p1(postX[]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker_p1(postX[])
+goal reachable: attacker_p1(postX[])
+
+Derivation:
+
+1. Using the function nil the attacker may obtain nil in phase 1.
+attacker_p1(nil).
+
+2. The message aChainKeyX[] may be sent to the attacker in phase 1 at output {16}.
+attacker_p1(aChainKeyX[]).
+
+3. By 2, the attacker may know aChainKeyX[] in phase 1.
+By 1, the attacker may know nil in phase 1.
+Using the function mac the attacker may obtain mac(aChainKeyX[],nil) in phase 1.
+attacker_p1(mac(aChainKeyX[],nil)).
+
+4. By 3, the attacker may know mac(aChainKeyX[],nil) in phase 1.
+By 1, the attacker may know nil in phase 1.
+Using the function hkdf_mk the attacker may obtain hkdf_mk(mac(aChainKeyX[],nil),nil) in phase 1.
+attacker_p1(hkdf_mk(mac(aChainKeyX[],nil),nil)).
+
+5. The message (pk(aSigPrivX[]),senc(postX[],hkdf_mk(mac(aChainKeyX[],nil),nil)),sign(senc(postX[],hkdf_mk(mac(aChainKeyX[],nil),nil)),aSigPrivX[])) may be sent to the attacker at output {14}.
+attacker((pk(aSigPrivX[]),senc(postX[],hkdf_mk(mac(aChainKeyX[],nil),nil)),sign(senc(postX[],hkdf_mk(mac(aChainKeyX[],nil),nil)),aSigPrivX[]))).
+
+6. By 5, the attacker may know (pk(aSigPrivX[]),senc(postX[],hkdf_mk(mac(aChainKeyX[],nil),nil)),sign(senc(postX[],hkdf_mk(mac(aChainKeyX[],nil),nil)),aSigPrivX[])).
+Using the function 2-proj-3-tuple the attacker may obtain senc(postX[],hkdf_mk(mac(aChainKeyX[],nil),nil)).
+attacker(senc(postX[],hkdf_mk(mac(aChainKeyX[],nil),nil))).
+
+7. By 6, the attacker may know senc(postX[],hkdf_mk(mac(aChainKeyX[],nil),nil)).
+So the attacker may know senc(postX[],hkdf_mk(mac(aChainKeyX[],nil),nil)) in phase 1.
+attacker_p1(senc(postX[],hkdf_mk(mac(aChainKeyX[],nil),nil))).
+
+8. By 7, the attacker may know senc(postX[],hkdf_mk(mac(aChainKeyX[],nil),nil)) in phase 1.
+By 4, the attacker may know hkdf_mk(mac(aChainKeyX[],nil),nil) in phase 1.
+Using the function sdec the attacker may obtain postX[] in phase 1.
+attacker_p1(postX[]).
+
+9. By 8, attacker_p1(postX[]).
+The goal is reached, represented in the following fact:
+attacker_p1(postX[]).
+
+
+A more detailed output of the traces is available with
+  set traceDisplay = long.
+
+new aChainKeyX: bitstring creating aChainKeyX_2 at {1}
+
+new aSigPrivX: exponent creating aSigPrivX_2 at {2}
+
+new aChainKeyY: bitstring creating aChainKeyY_3 at {3}
+
+out(c, (~M,~M_1,~M_2)) with ~M = pk(aSigPrivX_2), ~M_1 = senc(postX,hkdf_mk(mac(aChainKeyX_2,nil),nil)), ~M_2 = sign(senc(postX,hkdf_mk(mac(aChainKeyX_2,nil),nil)),aSigPrivX_2) at {14} in copy a
+
+out(c, (~M_3,~M_4,~M_5)) with ~M_3 = pk(aSigPrivX_2), ~M_4 = senc(postX,hkdf_mk(mac(aChainKeyX_2,nil),nil)), ~M_5 = sign(senc(postX,hkdf_mk(mac(aChainKeyX_2,nil),nil)),aSigPrivX_2) at {14} in copy a_1
+
+out(c, ~M_6) with ~M_6 = aChainKeyX_2 at {16} in copy a
+
+event AliceInvia(pk(aSigPrivY),senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil))) at {23} in copy a
+
+out(c, (~M_7,~M_8,~M_9)) with ~M_7 = pk(aSigPrivY), ~M_8 = senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil)), ~M_9 = sign(senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil)),aSigPrivY) at {24} in copy a
+
+out(c, ~M_10) with ~M_10 = aChainKeyX_2 at {16} in copy a_1
+
+event AliceInvia(pk(aSigPrivY),senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil))) at {23} in copy a_1
+
+out(c, (~M_11,~M_12,~M_13)) with ~M_11 = pk(aSigPrivY), ~M_12 = senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil)), ~M_13 = sign(senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil)),aSigPrivY) at {24} in copy a_1
+
+The attacker has the message sdec(~M_1,hkdf_mk(mac(~M_6,nil),nil)) = postX in phase 1.
+A trace has been found.
+RESULT not attacker_p1(postX[]) is false.
 -- Query not attacker_p1(postY[]) in process 1.
 Translating the process into Horn clauses...
 Completing...
@@ -64,20 +155,20 @@ RESULT not attacker_p1(postY[]) is true.
 Translating the process into Horn clauses...
 Completing...
 Starting query inj-event(BobRiceve(pk(aSigPrivY[]),m)) ==> inj-event(AliceInvia(pk(aSigPrivY[]),m))
-goal reachable: @sid ≠ @sid_1 && b-inj-event(AliceInvia(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ15_1) -> inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ24_1) && inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ24_2)
+goal reachable: @sid ≠ @sid_1 && b-inj-event(AliceInvia(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ23_1) -> inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ33_1) && inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ33_2)
 Abbreviations:
-@occ24_1 = @occ24[postYSigned_1 = sign(senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),aSigPrivY[]),postYEnc_1 = senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),!1 = @sid]
-@occ24_2 = @occ24[postYSigned_1 = sign(senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),aSigPrivY[]),postYEnc_1 = senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),!1 = @sid_1]
-@occ15_1 = @occ15[!1 = @sid_2]
+@occ33_1 = @occ33[postYSigned_1 = sign(senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),aSigPrivY[]),postYEnc_1 = senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),!1 = @sid]
+@occ33_2 = @occ33[postYSigned_1 = sign(senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),aSigPrivY[]),postYEnc_1 = senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),!1 = @sid_1]
+@occ23_1 = @occ23[!1 = @sid_2]
 
 Derivation:
 Abbreviations:
-@occ24_1 = @occ24[postYSigned_1 = sign(senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),aSigPrivY[]),postYEnc_1 = senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),!1 = @sid]
-@occ24_2 = @occ24[postYSigned_1 = sign(senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),aSigPrivY[]),postYEnc_1 = senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),!1 = @sid_1]
-@occ15_1 = @occ15[!1 = @sid_2]
+@occ33_1 = @occ33[postYSigned_1 = sign(senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),aSigPrivY[]),postYEnc_1 = senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),!1 = @sid]
+@occ33_2 = @occ33[postYSigned_1 = sign(senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),aSigPrivY[]),postYEnc_1 = senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),!1 = @sid_1]
+@occ23_1 = @occ23[!1 = @sid_2]
 
-1. The event AliceInvia(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))) (with occurrence name @occ15_1) may be executed at {15}.
-So the message (pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),sign(senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),aSigPrivY[])) may be sent to the attacker in phase 1 at output {16}.
+1. The event AliceInvia(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))) (with occurrence name @occ23_1) may be executed at {23}.
+So the message (pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),sign(senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),aSigPrivY[])) may be sent to the attacker in phase 1 at output {24}.
 attacker_p1((pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),sign(senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),aSigPrivY[]))).
 
 2. By 1, the attacker may know (pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),sign(senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),aSigPrivY[])) in phase 1.
@@ -98,58 +189,64 @@ By 2, the attacker may know sign(senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)
 Using the function 3-tuple the attacker may obtain (pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),sign(senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),aSigPrivY[])) in phase 1.
 attacker_p1((pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),sign(senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),aSigPrivY[]))).
 
-6. The message (pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),sign(senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),aSigPrivY[])) that the attacker may have in phase 1 by 5 may be received at input {19}.
-So event BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))) may be executed at {24} in session @sid_1.
-inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ24_2).
+6. The message (pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),sign(senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),aSigPrivY[])) that the attacker may have in phase 1 by 5 may be received at input {28}.
+So event BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))) may be executed at {33} in session @sid_1.
+inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ33_2).
 
-7. By 6, inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ24_2).
+7. By 6, inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ33_2).
 The goal is reached, represented in the following fact:
-inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ24_2).
+inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ33_2).
 
-8. The message (pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),sign(senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),aSigPrivY[])) that the attacker may have in phase 1 by 5 may be received at input {19}.
-So event BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))) may be executed at {24} in session @sid.
-inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ24_1).
+8. The message (pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),sign(senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil)),aSigPrivY[])) that the attacker may have in phase 1 by 5 may be received at input {28}.
+So event BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))) may be executed at {33} in session @sid.
+inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ33_1).
 
-9. By 8, inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ24_1).
+9. By 8, inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ33_1).
 The goal is reached, represented in the following fact:
-inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ24_1).
+inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ33_1).
 
-10. By 9, inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ24_1).
-By 7, inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ24_2).
-We have @occ24_1 ≠ @occ24_2.
+10. By 9, inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ33_1).
+By 7, inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ33_2).
+We have @occ33_1 ≠ @occ33_2.
 The goals for injectivity are reached, combined in the following fact:
-inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ24_1) && inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ24_2).
+inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ33_1) && inj-event(BobRiceve(pk(aSigPrivY[]),senc(postY[],hkdf_mk(mac(aChainKeyY[],nil),nil))),@occ33_2).
 
 
 A more detailed output of the traces is available with
   set traceDisplay = long.
 
-new aChainKeyX: bitstring creating aChainKeyX_1 at {1}
+new aChainKeyX: bitstring creating aChainKeyX_2 at {1}
 
-out(c, ~M) with ~M = aChainKeyX_1 at {3}
+new aSigPrivX: exponent creating aSigPrivX_2 at {2}
 
-new aChainKeyY: bitstring creating aChainKeyY_3 at {4}
+new aChainKeyY: bitstring creating aChainKeyY_3 at {3}
 
-event AliceInvia(pk(aSigPrivY),senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil))) at {15} in copy a
+out(c, (~M,~M_1,~M_2)) with ~M = pk(aSigPrivX_2), ~M_1 = senc(postX,hkdf_mk(mac(aChainKeyX_2,nil),nil)), ~M_2 = sign(senc(postX,hkdf_mk(mac(aChainKeyX_2,nil),nil)),aSigPrivX_2) at {14} in copy a
 
-out(c, (~M_1,~M_2,~M_3)) with ~M_1 = pk(aSigPrivY), ~M_2 = senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil)), ~M_3 = sign(senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil)),aSigPrivY) at {16} in copy a
+out(c, ~M_3) with ~M_3 = aChainKeyX_2 at {16} in copy a
 
-in(c, (~M_1,~M_2,~M_3)) with ~M_1 = pk(aSigPrivY), ~M_2 = senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil)), ~M_3 = sign(senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil)),aSigPrivY) at {19} in copy a_1
+event AliceInvia(pk(aSigPrivY),senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil))) at {23} in copy a
 
-event BobRiceve(pk(aSigPrivY),senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil))) at {24} in copy a_1 (goal)
+out(c, (~M_4,~M_5,~M_6)) with ~M_4 = pk(aSigPrivY), ~M_5 = senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil)), ~M_6 = sign(senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil)),aSigPrivY) at {24} in copy a
 
-in(c, (~M_1,~M_2,~M_3)) with ~M_1 = pk(aSigPrivY), ~M_2 = senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil)), ~M_3 = sign(senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil)),aSigPrivY) at {19} in copy a_2
+in(c, (~M_4,~M_5,~M_6)) with ~M_4 = pk(aSigPrivY), ~M_5 = senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil)), ~M_6 = sign(senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil)),aSigPrivY) at {28} in copy a_1
 
-event BobRiceve(pk(aSigPrivY),senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil))) at {24} in copy a_2 (goal)
+event BobRiceve(pk(aSigPrivY),senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil))) at {33} in copy a_1 (goal)
 
-The event BobRiceve(pk(aSigPrivY),senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil))) is executed at {24} in copy a_1.
-The event BobRiceve(pk(aSigPrivY),senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil))) is executed at {24} in copy a_2.
+in(c, (~M_4,~M_5,~M_6)) with ~M_4 = pk(aSigPrivY), ~M_5 = senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil)), ~M_6 = sign(senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil)),aSigPrivY) at {28} in copy a_2
+
+event BobRiceve(pk(aSigPrivY),senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil))) at {33} in copy a_2 (goal)
+
+The event BobRiceve(pk(aSigPrivY),senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil))) is executed at {33} in copy a_1.
+The event BobRiceve(pk(aSigPrivY),senc(postY,hkdf_mk(mac(aChainKeyY_3,nil),nil))) is executed at {33} in copy a_2.
 A trace has been found.
 RESULT inj-event(BobRiceve(pk(aSigPrivY[]),m)) ==> inj-event(AliceInvia(pk(aSigPrivY[]),m)) is false.
 RESULT (but event(BobRiceve(pk(aSigPrivY[]),m)) ==> event(AliceInvia(pk(aSigPrivY[]),m)) is true.)
 
 --------------------------------------------------------------
 Verification summary:
+
+Query not attacker_p1(postX[]) is false.
 
 Query not attacker_p1(postY[]) is true.
 

@@ -10,10 +10,11 @@ type exponent.
 type G.
 const nil: bitstring.
 
-(* Il messaggio postY che vogliamo proteggere *)
+(* postX travels in the old session, postY in the new one *)
+free postX: bitstring [private].
 free postY: bitstring [private].
 
-(* Chiave di firma di Alice per la sessione Y, referenziabile nella query di autenticazione *)
+(* Alice's signing key for session Y, referenceable in the authentication query *)
 free aSigPrivY: exponent [private].
 
 (* --- 2. CRYPTOGRAPHIC PRIMITIVES --- *)
@@ -29,32 +30,58 @@ fun hkdf_mk(bitstring, bitstring): bitstring.
 fun senc(bitstring, bitstring): bitstring.
 reduc forall msg: bitstring, key: bitstring; sdec(senc(msg, key), key) = msg.
 
-(* --- 3. EVENTS E QUERIES --- *)
+(* --- 3. EVENTS AND QUERIES --- *)
 event AliceInvia(G, bitstring).
 event BobRiceve(G, bitstring).
 
+(* Positive control: the old session must fall once its chain key is
+   compromised. If this query passed, the leak would be biting nothing and the
+   query on postY would prove very little *)
+query attacker(postX).
+
+(* Backward secrecy: the new session holds despite the compromise *)
 query attacker(postY).
 
 query m: bitstring; inj-event(BobRiceve(pk(aSigPrivY), m)) ==> inj-event(AliceInvia(pk(aSigPrivY), m)).
 
 
 (* --- 4. ALICE'S PROCESS --- *)
-let Alice(aChainKeyY: bitstring, aSigPrivY: exponent) =
+(* A single process, mirroring the successive principal Alice[...] blocks of the
+   Verifpal model: first the old session, then the compromise, then the new one *)
+let Alice(aChainKeyX: bitstring, aSigPrivX: exponent,
+          aChainKeyY: bitstring, aSigPrivY: exponent) =
+
+    (* --- SESSION X, BEFORE THE COMPROMISE --- *)
+    let kdfInputX = mac(aChainKeyX, nil) in
+    let messageKeyX = hkdf_mk(kdfInputX, nil) in
+
+    let postXEnc = senc(postX, messageKeyX) in
+    let postXSigned = sign(postXEnc, aSigPrivX) in
+
+    out(c, (pk(aSigPrivX), postXEnc, postXSigned));
+
+    (* --- PHASE 1: THE ATTACKER STEALS THE OLD CHAIN KEY --- *)
+    phase 1;
+    out(c, aChainKeyX);
+
+    (* --- SESSION Y, ROTATED AFTER THE COMPROMISE --- *)
     let aSigPubY = pk(aSigPrivY) in
-    
-    let kdfInput = mac(aChainKeyY, nil) in
-    let messageKeyY = hkdf_mk(kdfInput, nil) in
-    let aChainKeyY2 = hkdf_ck(kdfInput, nil) in
-    
+
+    let kdfInputY = mac(aChainKeyY, nil) in
+    let messageKeyY = hkdf_mk(kdfInputY, nil) in
+    let aChainKeyY2 = hkdf_ck(kdfInputY, nil) in
+
     let postYEnc = senc(postY, messageKeyY) in
     let postYSigned = sign(postYEnc, aSigPrivY) in
-    
+
     event AliceInvia(aSigPubY, postYEnc);
     out(c, (aSigPubY, postYEnc, postYSigned));
     0.
 
 (* --- 5. BOB'S PROCESS --- *)
+(* Receives in session Y, hence after the compromise *)
 let Bob(aChainKeyY: bitstring, aSigPubY: G) =
+    phase 1;
     in(c, (=aSigPubY, postYEnc: bitstring, postYSigned: bitstring));
 
     let kdfInput = mac(aChainKeyY, nil) in
@@ -69,15 +96,9 @@ let Bob(aChainKeyY: bitstring, aSigPubY: G) =
 
 (* --- 6. ENTRY POINT (MAIN) --- *)
 process
-    (* La vecchia Chain Key (X) usata nel passato *)
     new aChainKeyX: bitstring;
-
-    (* --- PHASE 1: l'attaccante ruba la vecchia Chain Key --- *)
-    phase 1;
-    out(c, aChainKeyX);
-
-    (* La nuova Chain Key (Y) ruotata *)
+    new aSigPrivX: exponent;
     new aChainKeyY: bitstring;
     let aSigPubY = pk(aSigPrivY) in
 
-    ( Alice(aChainKeyY, aSigPrivY) | Bob(aChainKeyY, aSigPubY) )
+    ( Alice(aChainKeyX, aSigPrivX, aChainKeyY, aSigPrivY) | Bob(aChainKeyY, aSigPubY) )
