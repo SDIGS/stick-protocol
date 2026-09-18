@@ -32,11 +32,13 @@ fun BlobData(bitstring, bitstring, bitstring): bitstring [data].
 (* --- 3. EVENTS & QUERIES --- *)
 event AliceInvia(bitstring).
 event BobRiceve(bitstring).
+event CharlieRiceve(bitstring).
 
 query attacker(photo1).
 query attacker(photo2).
 
 query p: bitstring; inj-event(BobRiceve(p)) ==> inj-event(AliceInvia(p)).
+query p: bitstring; inj-event(CharlieRiceve(p)) ==> inj-event(AliceInvia(p)).
 
 (* --- 4. ALICE'S PROCESS --- *)
 let Alice(aChainKey: bitstring, aSigPriv: exponent) =
@@ -106,11 +108,41 @@ let Bob(aChainKey: bitstring, aSigPub: G) =
     let photoDec2 = sdec(photoEnc2, ephAES2) in
     event BobRiceve(photoDec2).
 
+(* --- 6. CHARLIE'S PROCESS --- *)
+(* Second recipient of the same broadcast: the Sender Key is shared by every
+   group member, so Charlie ratchets in parallel from the same state *)
+let Charlie(aChainKey: bitstring, aSigPub: G) =
+    (* --- RECEIVE MESSAGE 1 --- *)
+    in(c, (blobSecEnc1: bitstring, blobSecSigned1: bitstring, photoEnc1: bitstring)) [precise];
+
+    let kdfInput1 = mac(aChainKey, nil) in
+    let messageKey1 = hkdf_mk(kdfInput1, nil) in
+    let chainKey2 = hkdf_ck(kdfInput1, nil) in (* RATCHET FORWARD, FORGETTING OLD KEY *)
+
+    if checksign(blobSecSigned1, aSigPub) = blobSecEnc1 then
+    let BlobData(ephAES1, ephMAC1, photoMac1) = sdec(blobSecEnc1, messageKey1) in
+    if mac(photoEnc1, ephMAC1) = photoMac1 then
+    let photoDec1 = sdec(photoEnc1, ephAES1) in
+    event CharlieRiceve(photoDec1);
+
+    (* --- RECEIVE MESSAGE 2 --- *)
+    in(c, (blobSecEnc2: bitstring, blobSecSigned2: bitstring, photoEnc2: bitstring)) [precise];
+
+    let kdfInput2 = mac(chainKey2, nil) in
+    let messageKey2 = hkdf_mk(kdfInput2, nil) in
+    let chainKey3 = hkdf_ck(kdfInput2, nil) in
+
+    if checksign(blobSecSigned2, aSigPub) = blobSecEnc2 then
+    let BlobData(ephAES2, ephMAC2, photoMac2) = sdec(blobSecEnc2, messageKey2) in
+    if mac(photoEnc2, ephMAC2) = photoMac2 then
+    let photoDec2 = sdec(photoEnc2, ephAES2) in
+    event CharlieRiceve(photoDec2).
+
 (* --- 7. ENTRY POINT (MAIN) --- *)
 process
     new aChainKey: bitstring;
     new aSigPriv: exponent;
     let aSigPub = pk(aSigPriv) in
-    
+
     out(c, aSigPub);
-    ( Alice(aChainKey, aSigPriv) | Bob(aChainKey, aSigPub) )
+    ( Alice(aChainKey, aSigPriv) | Bob(aChainKey, aSigPub) | Charlie(aChainKey, aSigPub) )
