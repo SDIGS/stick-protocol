@@ -14,7 +14,13 @@ const nil: bitstring.
 free postX: bitstring [private].
 free postY: bitstring [private].
 
-(* Alice's signing key for session Y, referenceable in the authentication query *)
+(* Every long-lived secret is global and [private], so that each query names
+   exactly the term the processes use. A name bound by new inside main cannot be
+   referred to from a query, and a process parameter of the same name would
+   shadow the global and leave the correspondence vacuously true *)
+free aChainKeyX: bitstring [private].
+free aChainKeyY: bitstring [private].
+free aSigPrivX: exponent [private].
 free aSigPrivY: exponent [private].
 
 (* --- 2. CRYPTOGRAPHIC PRIMITIVES --- *)
@@ -48,8 +54,7 @@ query m: bitstring; inj-event(BobRiceve(pk(aSigPrivY), m)) ==> inj-event(AliceIn
 (* --- 4. ALICE'S PROCESS --- *)
 (* A single process, mirroring the successive principal Alice[...] blocks of the
    Verifpal model: first the old session, then the compromise, then the new one *)
-let Alice(aChainKeyX: bitstring, aSigPrivX: exponent,
-          aChainKeyY: bitstring, aSigPrivY: exponent) =
+let Alice() =
 
     (* --- SESSION X, BEFORE THE COMPROMISE --- *)
     let kdfInputX = mac(aChainKeyX, nil) in
@@ -69,7 +74,6 @@ let Alice(aChainKeyX: bitstring, aSigPrivX: exponent,
 
     let kdfInputY = mac(aChainKeyY, nil) in
     let messageKeyY = hkdf_mk(kdfInputY, nil) in
-    let aChainKeyY2 = hkdf_ck(kdfInputY, nil) in
 
     let postYEnc = senc(postY, messageKeyY) in
     let postYSigned = sign(postYEnc, aSigPrivY) in
@@ -80,7 +84,7 @@ let Alice(aChainKeyX: bitstring, aSigPrivX: exponent,
 
 (* --- 5. BOB'S PROCESS --- *)
 (* Receives in session Y, hence after the compromise *)
-let Bob(aChainKeyY: bitstring, aSigPubY: G) =
+let Bob(aSigPubY: G) =
     phase 1;
     in(c, (=aSigPubY, postYEnc: bitstring, postYSigned: bitstring));
 
@@ -96,9 +100,6 @@ let Bob(aChainKeyY: bitstring, aSigPubY: G) =
 
 (* --- 6. ENTRY POINT (MAIN) --- *)
 process
-    new aChainKeyX: bitstring;
-    new aSigPrivX: exponent;
-    new aChainKeyY: bitstring;
     let aSigPubY = pk(aSigPrivY) in
 
-    ( Alice(aChainKeyX, aSigPrivX, aChainKeyY, aSigPrivY) | Bob(aChainKeyY, aSigPubY) )
+    ( Alice() | Bob(aSigPubY) )
