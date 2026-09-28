@@ -17,6 +17,8 @@ The models were written and checked against **ProVerif 2.05**, which on most sys
 opam install proverif
 ```
 
+The [official install guide](https://bblanche.gitlabpages.inria.fr/proverif/install.html) covers the other ways.
+
 A single model runs with:
 
 ```
