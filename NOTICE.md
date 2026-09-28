@@ -6,7 +6,7 @@ Everything below is by Diego Bertola, Copyright © 2026, added starting Septembe
 
 ## Modifications
 
-`FormalVerification/VerifpalModels/05_malicious_no_explixit_server_pass.vp` is a corrected rewrite of the original `05_malicious.vp`. In the original the attack is written by hand, inside a `Server` principal scripted to misbehave: it appends extra data to the ciphertext and forwards the result together with Alice's original signature. Bob then checks that signature against the modified ciphertext, and it fails, as it has to, since the signature was made over something else. The analysis stops right there, at the primitive check, and never gets far enough to say anything about the security properties.
+`FormalVerification/VerifpalModels/05_malicious_no_explixit_server.vp` is a corrected rewrite of the original `05_malicious.vp`. In the original the attack is written by hand, inside a `Server` principal scripted to misbehave: it appends extra data to the ciphertext and forwards the result together with Alice's original signature. Bob then checks that signature against the modified ciphertext, and it fails, as it has to, since the signature was made over something else. The analysis stops right there, at the primitive check, and never gets far enough to say anything about the security properties.
 
 That does not test the protocol, it tests what happens when a participant is programmed to break it, and the answer is always that it breaks. The rewrite drops the explicit server and leaves the Dolev-Yao attacker to act on its own, which is the point of having one: it already controls the channel, so there is nothing to script.
 

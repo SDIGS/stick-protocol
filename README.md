@@ -115,7 +115,7 @@ verifpal verify test_file.vp
 ```
 Tests 01->04 are expected to pass, while `05_malicious.vp` is expected to fail.
 
-`05_malicious_no_explixit_server_pass.vp` was added in this fork and is expected to pass. It covers the same scenario as
+`05_malicious_no_explixit_server.vp` was added in this fork and is expected to pass. It covers the same scenario as
 `05_malicious.vp`, but without a server principal scripted to tamper with the message: there the signature check cannot
 do anything other than fail, so the test never gets to say anything about the protocol. See [NOTICE.md](./NOTICE.md).
 
