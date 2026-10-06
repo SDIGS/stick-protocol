@@ -102,4 +102,4 @@ let Server() =
 
 (* --- ENTRY POINT (MAIN) --- *)
 process
-    ( Device1(ikPriv, spkPriv, opkPriv, alicePass, alicePass2) | Device2(alicePass, alicePass2) | Server() )
+    ( (! Device1(ikPriv, spkPriv, opkPriv, alicePass, alicePass2)) | (! Device2(alicePass, alicePass2)) | (! Server()) )
