@@ -84,7 +84,7 @@ let Alice(aChainKey: bitstring, aSigPriv: exponent) =
     let blobSecEnc = senc(blobSec, messageKey) in
     let blobSecSigned = sign(blobSecEnc, aSigPriv) in
 
-    event AliceInvia(photo, msgCounter);
+    event AliceInvia(blobSecEnc, msgCounter);
     out(c, (aSigPub, blobSecEnc, blobSecSigned, photoEnc));
 
     (* --- PHASE 1: COMPROMISE FOR SYMMETRIC RATCHET FORWARD SECRECY --- *)
@@ -115,7 +115,7 @@ let Bob(aChainKey: bitstring, aSigPub: G) =
     else
         insert seen_counters_bob(msgCounter);
         out(mutex_lock_bob, token);
-        event BobRiceve(photoDec, msgCounter);
+        event BobRiceve(blobSecEnc, msgCounter);
     0.
 
 (* --- 6. CHARLIE'S PROCESS --- *)
@@ -140,7 +140,7 @@ let Charlie(aChainKey: bitstring, aSigPub: G) =
     else
         insert seen_counters_charlie(msgCounter);
         out(mutex_lock_charlie, token);
-        event CharlieRiceve(photoDec, msgCounter);
+        event CharlieRiceve(blobSecEnc, msgCounter);
     0.
 
 (* --- 7. ENTRY POINT (MAIN) --- *)

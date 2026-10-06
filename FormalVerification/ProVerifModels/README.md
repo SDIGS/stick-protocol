@@ -1,7 +1,7 @@
 <h1 align="center">ProVerif Models</h1>
 <p align="center">A stricter re-verification of the Stick protocol, translated from the Verifpal models</p>
 
-Eleven models. Most of the properties they state are proved, the `03_` pair exposes a genuine weakness of the protocol, and every other verdict that is not `is true` is either the result the experiment was built to measure, a replay left open on purpose, or a limit of what the tool can decide. The table under [Expected results](#expected-results) says which is which, and no verdict in `outputs/` should be read without it.
+Ten models. Most of the properties they state are proved, `03_re-establish.pv` exposes a genuine weakness of the protocol, and every other verdict that is not `is true` is either the result the experiment was built to measure, a replay left open on purpose, or a limit of what the tool can decide. The table under [Expected results](#expected-results) says which is which, and no verdict in `outputs/` should be read without it.
 
 ## Overview
 
@@ -71,14 +71,13 @@ Three details are easy to misread.
 | `02_sticky_session.pv` | holds | **fails** | Group messaging, no replay protection |
 | `02_sticky_session_fixed.pv` | holds | *cannot be proved* | Replay protection via stored counters |
 | `02_sticky_session_pass.pv` | holds | holds | Replay resistance from the ratchet alone |
-| `03_re-establish.pv` | holds\* | **fails** | Backing up private keys to the server |
-| `03_re-establish_multi.pv` | holds\* | **fails** | The same, concurrent sessions |
+| `03_re-establish.pv` | holds\* | **fails** | Backing up private keys to the server, concurrent sessions |
 | `04_backward_secrecy.pv` | holds† | holds | Recovery after a chain key is compromised |
 | `04_backward_secrecy_multi.pv` | holds† | **fails** | The same, concurrent sessions |
 | `05_malicious_no_explixit_server.pv` | holds | holds | Signature checked against a known key |
 | `05_malicious_no_explixit_server_multi.pv` | holds | **fails** | The same, concurrent sessions |
 
-\* The private keys are never leaked, but both `03_` models report a successful guessing attack against the password itself.
+\* The private keys are never leaked, but the model also reports a successful guessing attack against the password itself.
 
 † Refers to `postY`, sent after the compromise. Both `04_` models also query `postX`, which is meant to fail. See below.
 
@@ -114,7 +113,7 @@ The implementation does track it, though not everywhere. In [`GroupCipher.getSen
 
 ### 3. A genuine weakness of the protocol
 
-Both `03_` models are here, and they are the only place where a verdict reports a real defect. Private keys are backed up encrypted under a key derived from the user's password, but nothing binds each encrypted key to the slot it belongs in, and nothing protects the backup as a whole. An attacker able to tamper with the server response can swap the encrypted keys between slots, and the receiving device accepts them without noticing it has installed the wrong key in the wrong place. Here both forms of the correspondence break, so the flaw is one of value rather than of multiplicity.
+`03_re-establish.pv` is here, and it is the only place where a verdict reports a real defect. Private keys are backed up encrypted under a key derived from the user's password, but nothing binds each encrypted key to the slot it belongs in, and nothing protects the backup as a whole. An attacker able to tamper with the server response can swap the encrypted keys between slots, and the receiving device accepts them without noticing it has installed the wrong key in the wrong place. Here both forms of the correspondence break, so the flaw is one of value rather than of multiplicity.
 
 The weak secret result compounds it, since the key protecting the backup comes from a password, and the backup itself gives whoever holds it a way to tell a correct guess from a wrong one without ever contacting the server.
 
@@ -128,7 +127,7 @@ The weak secret result compounds it, since the key protecting the backup comes f
 
 **There are three `02_` models because the faithful fix cannot be proved.** `02_sticky_session_fixed.pv` keeps a table of counters guarded by a lock, which is an accurate picture of what the real sender key store does. ProVerif cannot settle it, because its reasoning loses precision on table lookups inside replicated processes, and the answer comes back as `cannot be proved` rather than an attack. `02_sticky_session_pass.pv` instead unrolls two messages, showing that the ratchet alone makes an old message useless once the key has moved on, without tracking anything. That is a weaker claim than the real system offers, but one the tool can establish.
 
-**The `_multi` variants exist to be compared against their single-session counterparts.** Read in isolation they are misleading, for the reason given under category 2. The comparison is informative for `04_` and `05_`, where one version passes and the other does not, and the difference is the whole point. For `03_` there is nothing to compare. Both versions fail, the derivations coincide, and the non injective query fails as well, which tells us the attack is about a wrong value and not a repeated one. A single session is enough to exhibit it.
+**The `_multi` variants exist to be compared against their single-session counterparts.** Read in isolation they are misleading, for the reason given under category 2. The comparison is informative for `04_` and `05_`, where one version passes and the other does not, and the difference is the whole point. `03_` used to have a pair as well, and no longer does: both versions failed, the derivations coincided, and the non injective query failed too, which tells us the attack is about a wrong value and not a repeated one. One session is enough to exhibit it, so keeping two files suggested a difference that was not there. The replicated version was kept, since it subsumes the other.
 
 ## Why `05_malicious.vp` was not translated
 
