@@ -119,6 +119,40 @@ Tests 01->04 are expected to pass, while `05_malicious.vp` is expected to fail.
 `05_malicious.vp`, but without a server principal scripted to tamper with the message: there the signature check cannot
 do anything other than fail, so the test never gets to say anything about the protocol. See [NOTICE.md](./NOTICE.md).
 
+### ProVerif models
+
+This fork also adds a translation of the Verifpal models into <a href="https://bblanche.gitlabpages.inria.fr/proverif/">ProVerif</a>,
+under `FormalVerification/ProVerifModels`, with stricter queries. Where the Verifpal models ask whether a message was
+authentic, these also ask whether it could have been replayed and whether it is bound to the identity of whoever sent
+it. A few have no Verifpal counterpart: variants that remove one feature of the protocol to measure how much depends on
+it, and variants that run the same protocol in many concurrent sessions rather than one.
+
+The models were written and checked against ProVerif 2.05, which on most systems comes from opam:
+```
+opam install proverif
+```
+The <a href="https://bblanche.gitlabpages.inria.fr/proverif/install.html">official install guide</a> covers the other ways.
+
+A single model runs with:
+```
+proverif file_name.pv
+```
+The output of every model is kept in `outputs/`, produced with:
+```
+proverif file_name.pv > outputs/file_name.txt
+```
+To regenerate all of them at once:
+```
+for f in *.pv; do proverif "$f" > "outputs/${f%.pv}.txt"; done
+```
+Everything finishes in about a second except `01_pairwise_session.pv`, which takes several minutes because it is one of
+the two models that declare Diffie-Hellman commutativity.
+
+Not every model is expected to pass, and the failures do not all mean the same thing. Some are the result the model was
+built to measure, one marks a limit of the tool, and some are replays left open on purpose. See
+[FormalVerification/ProVerifModels/README.md](./FormalVerification/ProVerifModels/README.md) for the expected result of
+each model and what its verdict means. See [NOTICE.md](./NOTICE.md) for attribution.
+
 ## License
 
 Copyright © 2018-2024 <a href="https://www.sticknet.org">Sticknet</a>

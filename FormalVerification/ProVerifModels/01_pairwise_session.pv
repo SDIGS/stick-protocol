@@ -12,6 +12,7 @@ free secret_msg: bitstring [private].
 type exponent.
 type G.
 
+(* Global constant to represent Verifpal's "nil" parameters *)
 const nil: bitstring.
 
 free aIkPriv: exponent [private].

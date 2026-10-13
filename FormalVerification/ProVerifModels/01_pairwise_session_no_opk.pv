@@ -13,7 +13,7 @@ type exponent.
 type G.
 
 (* Global constant to represent Verifpal's "nil" parameters *)
-const nil: bitstring. 
+const nil: bitstring.
 
 free aIkPriv: exponent [private].
 free bIkPriv: exponent [private].
