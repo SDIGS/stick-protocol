@@ -2,7 +2,7 @@
 
 This repository is a fork of [Stick Protocol](https://github.com/sticknet/stick-protocol), Copyright © 2018-2024 [Sticknet](https://www.sticknet.org), licensed under the GNU General Public License v3.0 (see [LICENSE](LICENSE)).
 
-Everything listed under Modifications, Additions and Documentation below is by Diego Bertola, Copyright © 2026, added starting August 2026 as part of a bachelor's thesis on formal verification and security auditing of the Stick Protocol (University of Turin, supervisor Prof. Idilio Drago, co-supervisor Prof. Ugo de' Liguoro). Licensed under the same GNU General Public License v3.0 as the rest of the project.
+Everything listed under Modifications, Additions and Documentation below is by Diego Bertola, Copyright © 2026, added starting August 2026 as part of a bachelor's thesis on formal verification and security auditing of the Stick Protocol (University of Turin, supervisor Prof. Idilio Drago, co-supervisor Prof. Ugo De' Liguoro). Licensed under the same GNU General Public License v3.0 as the rest of the project.
 
 ## What the original project already provides
 
@@ -14,9 +14,9 @@ The work added here starts from that boundary.
 
 ## Modifications
 
-`FormalVerification/VerifpalModels/05_malicious_no_explixit_server.vp` is a corrected rewrite of the original `05_malicious.vp`. In the original the attack is written by hand, inside a `Server` principal scripted to misbehave. It appends extra data to the ciphertext and forwards the result together with Alice's original signature. Bob then checks that signature against the modified ciphertext, and it fails, as it has to, since the signature was made over something else. The analysis stops right there, at the primitive check, and never gets far enough to say anything about the security properties.
+`FormalVerification/VerifpalModels/05_malicious_no_explixit_server.vp` reformulates the security question the original `05_malicious.vp` was meant to ask, with the network attacker left to act on its own and the verification key anchored to a locally established value. In the original a `Server` principal performs one fixed tampering move. It appends extra data to the ciphertext and forwards the result together with Alice's original signature. Bob then checks that signature against the modified ciphertext, and it fails, as it has to, since the signature was made over something else. The analysis stops right there, at the primitive check, and never gets far enough to say anything about the security properties.
 
-That does not test the protocol, it tests what happens when a participant is programmed to break it, and the answer is always that it breaks. The rewrite drops the explicit server and leaves the Dolev-Yao attacker to act on its own, which is the point of having one, since it already controls the channel and there is nothing to script.
+What that execution establishes is narrow. A signature does not verify over a message it was not made over, which holds for any signature scheme and says nothing about Stick. The rewrite drops the scripted server and leaves the Dolev-Yao attacker, which the file already declares, to act on its own.
 
 The original stays in place rather than being replaced, so the correction remains part of the record. The starting point is still reachable, and the step from one model to the other can be followed and questioned.
 
@@ -32,7 +32,7 @@ No other file from the original project has been changed.
 
 ```
 FormalVerification/ProVerifModels/
-├── README.md          how to run the models, expected results,
+├── README.md          expected results, relevant explanations
 │                      and which failures are intentional
 ├── *.pv               the models themselves
 └── outputs/           the output of each model, one file per model

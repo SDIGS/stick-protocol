@@ -13,7 +13,7 @@ to fail.
 | `01_pairwise_session_no_opk.pv` | **fails** | holds | Same handshake, one-time prekey and DH4 removed |
 | `02_sticky_session.pv` | holds | **fails** | Group messaging, no replay protection |
 | `02_sticky_session_fixed.pv` | holds | *cannot be proved* | Replay protection via stored counters |
-| `02_sticky_session_pass.pv` | holds | holds | Replay resistance from the ratchet alone |
+| `02_sticky_session_pass.pv` | holds | holds | Two messages unrolled, replay resistance from the ratchet alone |
 | `03_re-establish.pv` | holds\* | **fails** | Backing up private keys to the server |
 | `04_backward_secrecy.pv` | holds† | holds | Recovery after a chain key is compromised |
 | `04_backward_secrecy_multi.pv` | holds† | **fails** | The same, concurrent sessions |
@@ -71,10 +71,14 @@ flaw is one of value. The weak secret result on the same model compounds it.
 
 ## Notes on how they are built
 
-**Only the `01_` models need tuning.** Both carry pruning directives and a `nounif` weighting that appear nowhere else.
-Diffie-Hellman commutativity gives the solver an unbounded space to unify over, and without them the run exhausts
-memory instead of terminating. The `nounif` only changes the order of exploration; the pruning is an assumption, and
-ProVerif verifies it before relying on it, visible in the output as `secrecy assumption verified`.
+**Only the `01_` models need tuning.** Both carry pruning directives and a `nounif` weighting that appear nowhere
+else. Diffie-Hellman commutativity gives the solver an unbounded space to unify over, and without them the run
+exhausts memory instead of terminating. The `nounif` only changes the order of exploration; the pruning is an
+assumption, and ProVerif verifies it before relying on it, visible in the output as `secrecy assumption verified`.
+
+How much that equation costs is visible in the two models themselves. They differ only in the fourth exchange, and
+`01_pairwise_session_no_opk.pv` returns in about six seconds where `01_pairwise_session.pv` needs around eight
+minutes. Every other model here finishes in under a second, because none of them declares the equation at all.
 
 **There are three `02_` models because the faithful fix cannot be proved.** `02_sticky_session_fixed.pv` keeps a table
 of counters guarded by a lock, which is an accurate picture of what the real sender key store does, and ProVerif cannot
@@ -88,15 +92,16 @@ because there the non-injective query fails too, which means one session is enou
 
 ## Why `05_malicious.vp` was not translated
 
-That file writes the attacker's moves into the model itself. Both tools assume a Dolev-Yao attacker that already
-controls the network, so the tool is meant to find an attack on its own and the model never needs to hand it one.
-Writing a particular sequence of moves replaces the general attacker with a weaker, scripted one.
+That file writes one particular sequence of tampering into the model itself. The file does declare
+`attacker[active]`, so the general Dolev-Yao attacker is present; what the script adds is a `Server` principal that
+performs a fixed move, and the run that follows is the one the script describes rather than one the tool found.
 
-Here the consequence is more concrete. The tampering is performed by a `Server` principal that appends data to the
-ciphertext, and the first thing Bob does with the result is `SIGNVERIF(aSigPub, malpost, postSigned)?`. The signature
-cannot match, which is the intended point, but the trailing `?` makes it a guard, so the branch is discarded there.
+What that costs is visible in the trace. That principal appends data to the ciphertext, and the first thing Bob does
+with the result is `SIGNVERIF(aSigPub, malpost, postSigned)?`. The signature cannot match, which is the intended
+point, but the trailing `?` makes it a guard, so the branch is discarded there.
 Bob never reaches the decryption, and the confidentiality query ends up answered over an execution in which nothing of
 substance took place.
 
-`05_malicious_no_explixit_server.vp` was added to cover the same scenario without the scripted server, and its two
-ProVerif counterparts are in the table above. See [NOTICE.md](../../NOTICE.md) for what this fork adds.
+`05_malicious_no_explixit_server.vp` reformulates the question without the scripted move, asking instead what happens
+when Bob accepts the verification key from the network rather than from a locally established value. Its two ProVerif
+counterparts are in the table above. See [NOTICE.md](../../NOTICE.md) for what this fork adds.
