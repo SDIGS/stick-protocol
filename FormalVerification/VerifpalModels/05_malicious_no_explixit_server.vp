@@ -3,7 +3,7 @@ attacker[active]
 principal Alice[
 	knows private aChainKey
 	knows private aSigPriv
-	aSigPub = G^aSigPriv
+	aSigPub = PUBKEY(aSigPriv)
 ]
 
 principal Bob[

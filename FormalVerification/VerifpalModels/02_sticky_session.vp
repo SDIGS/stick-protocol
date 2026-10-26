@@ -7,7 +7,7 @@ principal Bob[]
 principal Alice[
 	knows private aChainKey // Alice's Chain key for a sticky session
 	knows private aSigPriv // Alice's private signature key for a sticky session
-	aSigPub = G^aSigPriv // Alice's public signature key for a sticky sesison
+	aSigPub = PUBKEY(aSigPriv) // Alice's public signature key for a sticky sesison
 ]
 
 principal Alice[

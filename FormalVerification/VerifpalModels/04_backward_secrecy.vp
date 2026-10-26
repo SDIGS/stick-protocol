@@ -6,7 +6,7 @@ attacker[active]
 principal Alice[
 	knows private aChainKeyX // Alice's Chain key for a sticky session
 	knows private aSigPrivX // Alice's private signature key for a sticky session
-	aSigPubX = G^aSigPrivX // Alice's public signature key for a sticky sesison
+	aSigPubX = PUBKEY(aSigPrivX) // Alice's public signature key for a sticky sesison
 ]
 
 phase[1]
@@ -16,7 +16,7 @@ principal Alice[leaks aChainKeyX]
 principal Alice[
 	knows private aChainKeyY // Alice's Chain key for a sticky session
 	knows private aSigPrivY // Alice's private signature key for a sticky session
-	aSigPubY = G^aSigPrivY // Alice's public signature key for a sticky sesison
+	aSigPubY = PUBKEY(aSigPrivY) // Alice's public signature key for a sticky sesison
 ]
 
 principal Alice[
