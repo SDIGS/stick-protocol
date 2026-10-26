@@ -4,11 +4,11 @@ This repository is a fork of [Stick Protocol](https://github.com/sticknet/stick-
 
 Everything listed under Modifications, Additions and Documentation below is by Diego Bertola, Copyright © 2026, added starting August 2026 as part of a bachelor's thesis on formal verification and security auditing of the Stick Protocol (University of Turin, supervisor Prof. Idilio Drago, co-supervisor Prof. Ugo De' Liguoro). Licensed under the same GNU General Public License v3.0 as the rest of the project.
 
-## What the original project already provides
+## What the original project provided
 
-The formal verification in the original project is five Verifpal models under `FormalVerification/VerifpalModels`, added by the project author in July 2024. They cover the four phases of the protocol, pairwise session, sticky session, re-establishment and backward secrecy, plus one model of a malicious server. Between them they ask fourteen queries of two kinds, whether a message reaching a participant was authentic, and whether a given value stays confidential. Three of the five (`01_`, `02_` and `04_`) use Verifpal's `phase` and `leaks` constructs, so they hand long-term keys to the attacker after the fact and ask the confidentiality question again, which is the forward secrecy question. Four are expected to pass and `05_malicious.vp` is expected to fail.
+The formal verification in the original project was five Verifpal models under `FormalVerification/VerifpalModels`, added by the project author in July 2024 and written for Verifpal 0.52.0, the current release until August 2026. Everything said about them in this section describes that version and those files as published. They covered the four phases of the protocol, pairwise session, sticky session, re-establishment and backward secrecy, plus one model of a malicious server. Between them they asked fourteen queries of two kinds, whether a message reaching a participant was authentic, and whether a given value stays confidential. Three of the five (`01_`, `02_` and `04_`) used Verifpal's `phase` and `leaks` constructs, so they handed long-term keys to the attacker after the fact and asked the confidentiality question again, which is the forward secrecy question. Four were expected to pass and `05_malicious.vp` to fail.
 
-Each model runs a single session, with one copy of each participant. Verifpal's `authentication?` query does not count how many times a message is accepted, so replay falls outside what these models can express. In `03_re-establish.vp` the user's password appears as `confidentiality? alicePass`, which asks whether the password leaks while treating it as a value with full entropy rather than one a person chose.
+Each model ran a single session, with one copy of each participant. In 0.52.0 the `authentication?` query did not count how many times a message was accepted, so replay fell outside what those models could express; Verifpal 1.3 of 26 August 2026 changed that, and the Modifications section records what followed. In `03_re-establish.vp` the user's password appeared as `confidentiality? alicePass`, which asks whether the password leaks while treating it as a value with full entropy rather than one a person chose.
 
 The work added here starts from that boundary.
 
@@ -22,7 +22,13 @@ The original stays in place rather than being replaced, so the correction remain
 
 `FormalVerification/VerifpalModels/01_pairwise_session.vp` has one identifier corrected. Bob derives his root key and sending chain key from `bmaster`, while the value computed on the line above is `bMaster`. Verifpal identifiers are case-sensitive, so the two are different names.
 
-`FormalVerification/VerifpalModels/03_re-establish.vp`, `04_backward_secrecy.vp` and `05_malicious.vp` have their indentation normalized to tabs, matching `01_` and `02_`. Nothing else in them is touched.
+`FormalVerification/VerifpalModels/03_re-establish.vp`, `04_backward_secrecy.vp` and `05_malicious.vp` have their indentation normalized to tabs, matching `01_` and `02_`.
+
+All six models are migrated to the syntax Verifpal 1.x requires, since Verifpal 1.0 of 15 August 2026 rewrote the modelling language and the files as published no longer parse. The migration is mechanical. `G^x` becomes `PUBKEY(x)`, `gx^y` becomes `DH_KEX(gx, y)`, and `AEAD_ENC`/`AEAD_DEC` take a nonce as their second argument, for which the `nil` constant already present in the models is used, since they model no nonce and inventing a fresh one would change what they state. Substituting a freshly generated nonce changes no verdict, which was checked. The migration is commit `985fee2`, and `d673146` is the last commit in which these files carry the syntax they were published with.
+
+`03_re-establish.vp` is migrated as far as that goes and still does not parse. It uses `knows password` and `PW_HASH`, and 1.x removed both. Low-entropy secrets are now expressed by annotating the primitive that consumes them, which is a different modelling decision rather than a different spelling, so rewriting the model to suit it would change what it asserts. The file is left at that point rather than reinterpreted.
+
+Under Verifpal 1.6.7 the migrated models report replay on `02_`, `04_` and `05_malicious_no_explixit_server.vp`, which are the three the ProVerif models in this repository already report through injective correspondences, and they reject `05_malicious.vp` before any query is reached, for the reason given below. `01_pairwise_session.vp` fails there and its ProVerif counterpart does not; the two are different models and the difference is recorded rather than resolved.
 
 `README.md` gains four things: a heading over the Verifpal subsection, which previously sat under Verification Tests untitled; a note on the second `05_` model; a ProVerif Models subsection; and a line under License pointing to this file.
 
