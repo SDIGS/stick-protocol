@@ -1,0 +1,21 @@
+Verifpal 1.6.7 - https://verifpal.com
+ Verifpal * Verification initiated for '05_malicious_no_explixit_server.vp' at 09:59:01 AM.
+     Info . Analyzing 2 parallel sessions per principal; per-session values and principals are suffixed #2.
+     Info . Attacker is configured as active.
+     Info . authentication? Alice -> Bob: postenc reports a duplicate that Bob cannot rule out on its own: it contributes nothing to postenc before accepting it, so any run of it takes the same message twice. Read it as a replay-protection question about this flight rather than as a forgery.
+     FAIL x authentication? Alice -> Bob: postenc (Analysis 17)
+
+--------------------------------------------------
+ Verifpal * Verification completed for '05_malicious_no_explixit_server.vp' at 09:59:01 AM in 7ms.
+
+     PASS + confidentiality? post  [search exhausted at 2 sessions]
+     FAIL x authentication? Alice -> Bob: postenc  [duplicate acceptance: no recipient-generated context]
+            Attack trace:
+            | 1. Attacker replays postenc (Alice to Bob) from another session, where it is ENC(messagekey, post#2).
+            | 2. Attacker replays postsigned (Alice to Bob) from another session, where it is SIGN(asigpriv, postenc#2).
+            | 3. Bob's SIGNVERIF(asigpub, ENC(messagekey, post#2), SIGN(asigpriv, ENC(messagekey, post#2)))? passes — the attacker controls one of its inputs.
+            > postenc (ENC(messagekey, post#2)), which Alice sent in another session and not in this one, is successfully used in SIGNVERIF(asigpub, postenc, postsigned)? within Bob's state: Alice sent it once, Bob accepts it twice, so agreement is not injective.
+
+--------------------------------------------------
+     FAIL x 1 of 2 queries failed.
+ Verifpal * Thank you for using Verifpal.

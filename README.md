@@ -115,9 +115,15 @@ can be run as follows:
 ```
 verifpal verify test_file.vp
 ```
-Tests 01->04 are expected to pass, while `05_malicious.vp` is expected to fail.
+Under Verifpal 0.52.0, the version these models were written for, tests 01->04 pass and
+`05_malicious.vp` fails. Verifpal 1.0 rewrote the modelling language, so the files here carry
+the migrated syntax, and under 1.6.7 the verdicts are different. `01_` fails both of its
+queries, `02_` and `04_` fail authentication and pass confidentiality, and
+`03_re-establish.vp` does not parse at all, because 1.x removed the constructs it uses for
+passwords. The output of each run is in `FormalVerification/VerifpalModels/outputs/`, and
+[NOTICE.md](./NOTICE.md) records what the migration changed and what each verdict means.
 
-`05_malicious_no_explixit_server.vp` is expected to pass. It covers the same scenario as `05_malicious.vp`, but without
+`05_malicious_no_explixit_server.vp` passes under 0.52.0, and under 1.6.7 its confidentiality query still passes while authentication fails on the replay that version is able to see. It covers the same scenario as `05_malicious.vp`, but without
 a server principal scripted to tamper with the message. In the original, the signature check cannot do anything other
 than fail, so the test never gets to say anything about the protocol. See [NOTICE.md](./NOTICE.md).
 

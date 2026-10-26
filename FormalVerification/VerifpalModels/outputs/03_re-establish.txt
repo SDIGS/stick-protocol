@@ -1,0 +1,8 @@
+Verifpal 1.6.7 - https://verifpal.com
+parse error: unknown qualifier `password`
+  --> 03_re-establish.vp:10:8
+   |
+10 |     knows password alicePass
+   |           ^^^^^^^^
+   |
+   = note: `knows` takes one of `private` or `public`

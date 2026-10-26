@@ -1,0 +1,21 @@
+Verifpal 1.6.7 - https://verifpal.com
+ Verifpal * Verification initiated for '04_backward_secrecy.vp' at 09:59:01 AM.
+     Info . Analyzing 2 parallel sessions per principal; per-session values and principals are suffixed #2.
+     Info . Attacker is configured as active.
+     Info . authentication? Alice -> Bob: postyenc reports a duplicate that Bob cannot rule out on its own: it contributes nothing to postyenc before accepting it, so any run of it takes the same message twice. Read it as a replay-protection question about this flight rather than as a forgery.
+     FAIL x authentication? Alice -> Bob: postyenc (Analysis 17)
+
+--------------------------------------------------
+ Verifpal * Verification completed for '04_backward_secrecy.vp' at 09:59:01 AM in 8ms.
+
+     FAIL x authentication? Alice -> Bob: postyenc  [duplicate acceptance: no recipient-generated context]
+            Attack trace:
+            | 1. Attacker replays postyenc (Alice to Bob) from another session, where it is ENC(messagekeyy, posty#2).
+            | 2. Attacker replays postysigned (Alice to Bob) from another session, where it is SIGN(asigprivy, postyenc#2).
+            | 3. Bob's SIGNVERIF(asigpuby, ENC(messagekeyy, posty#2), SIGN(asigprivy, ENC(messagekeyy, posty#2)))? passes — the attacker controls one of its inputs.
+            > postyenc (ENC(messagekeyy, posty#2)), which Alice sent in another session and not in this one, is successfully used in SIGNVERIF(asigpuby, postyenc, postysigned)? within Bob's state: Alice sent it once, Bob accepts it twice, so agreement is not injective.
+     PASS + confidentiality? posty  [search exhausted at 2 sessions]
+
+--------------------------------------------------
+     FAIL x 1 of 2 queries failed.
+ Verifpal * Thank you for using Verifpal.

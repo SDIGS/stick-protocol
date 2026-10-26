@@ -1,0 +1,11 @@
+Verifpal 1.6.7 - https://verifpal.com
+ Verifpal * Verification initiated for '05_malicious.vp' at 09:59:01 AM.
+     Info . Analyzing 2 parallel sessions per principal; per-session values and principals are suffixed #2.
+sanity error: `SIGNVERIF` cannot succeed as written
+  --> 05_malicious.vp:28:6
+   |
+28 |     _ = SIGNVERIF(aSigPub, malpost, postSigned)? // Verify signature, test should fail here
+   |         ^^^^^^^^^ this check fails in the honest run
+   |
+   = note: `SIGNVERIF(PUBKEY(asigpriv), CONCAT(ENC(HKDF(MAC(achainkey, nil), nil, nil), post), malpart), SIGN(asigpriv, ENC(HKDF(MAC(achainkey, nil), nil, nil), post)))?` is checked with `?`, so the principal halts when it fails; here it fails even with no attacker, which makes the model describe a protocol that never completes
+   = help: check that the key, message and any additional data match what the other principal used

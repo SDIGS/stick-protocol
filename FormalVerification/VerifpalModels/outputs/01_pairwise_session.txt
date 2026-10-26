@@ -1,0 +1,41 @@
+Verifpal 1.6.7 - https://verifpal.com
+ Verifpal * Verification initiated for '01_pairwise_session.vp' at 09:59:01 AM.
+     Info . Analyzing 2 parallel sessions per principal; per-session values and principals are suffixed #2.
+     Info . Attacker is configured as active.
+     FAIL x authentication? Alice -> Bob: msg1enc (Analysis 4)
+     FAIL x confidentiality? msg1 (Analysis 21)
+
+--------------------------------------------------
+ Verifpal * Verification completed for '01_pairwise_session.vp' at 09:59:01 AM in 44ms.
+
+     FAIL x authentication? Alice -> Bob: msg1enc
+            Attack trace:
+            | 1. Attacker replaces msg1enc (sent by Alice to Bob) with nil. (msg1enc was AEAD_ENC(bmk1, nil, msg1, HASH(aikpub, bikpub, aek2pub)))
+            > msg1enc (nil), sent by Attacker and not by Alice, is successfully used in AEAD_DEC(bmk1, nil, msg1enc, HASH(aikpub, bikpub, aek2pub)) within Bob's state.
+     FAIL x confidentiality? msg1
+            Attack trace:
+            | 1. Attacker constructs PUBKEY(nil).
+            | 2. Attacker replaces bopkpub (sent by Bob to Alice) with PUBKEY(nil). (bopkpub was PUBKEY(bopkpriv))
+            | 3. Attacker observes msg1enc on the wire, where it is AEAD_ENC(amk1, nil, msg1, HASH(aikpub, bikpub, aek2pub)).
+            | 4. Attacker observes aek2pub on the wire.
+            | 5. Attacker is handed bspkpriv by a leaks declaration in Bob.
+            | 6. Attacker constructs bdh1.
+            | 7. Attacker observes bspkpub on the wire.
+            | 8. Attacker is handed aikpriv by a leaks declaration in Alice.
+            | 9. Attacker constructs DH_KEX(bspkpub, aikpriv).
+            | 10. Attacker observes aek1pub on the wire.
+            | 11. Attacker is handed bikpriv by a leaks declaration in Bob.
+            | 12. Attacker constructs DH_KEX(aek1pub, bikpriv).
+            | 13. Attacker constructs DH_KEX(aek1pub, bspkpriv).
+            | 14. Attacker constructs DH_KEX(aek1pub, nil).
+            | 15. Attacker constructs amastersec, where it is HASH(DH_KEX(bspkpub, aikpriv), DH_KEX(aek1pub, bikpriv), DH_KEX(aek1pub, bspkpriv), DH_KEX(aek1pub, nil)).
+            | 16. Attacker constructs ark1, where it is HKDF(amastersec, nil, nil)|1.
+            | 17. Attacker constructs ackab1, where it is HKDF(bdh1, ark1, nil)|2.
+            | 18. Attacker constructs MAC(ackab1, nil).
+            | 19. Attacker constructs amk1, where it is HKDF(MAC(ackab1, nil), nil, nil)|2.
+            | 20. Attacker opens msg1enc with amk1, nil, obtaining msg1.
+            > msg1 (msg1) is obtained by Attacker.
+
+--------------------------------------------------
+     FAIL x 2 of 2 queries failed.
+ Verifpal * Thank you for using Verifpal.
