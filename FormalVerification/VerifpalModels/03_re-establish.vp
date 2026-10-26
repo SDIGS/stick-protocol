@@ -7,16 +7,14 @@ principal Device1[
 	ikPub = PUBKEY(ikPriv)
 	spkPub = PUBKEY(spkPriv)
 	opkPub = PUBKEY(opkPriv)
-	knows password alicePass
-	knows password alicePass2
+	knows private alicePass
+	knows private alicePass2
 ]
 
 principal Device1[
-	// In Verifpal, PW_HASH represents deriving a secret key or a hash using Argon2
 	// Secret key to encrypt the private keys. 
-	// In reality, every private key is encrypted using a unique secret key
-	secretKeyD1 = PW_HASH(alicePass)
-	hashedPassD1 = PW_HASH(alicePass2) // Client-side hashing of password used in the "Double hashing"
+	secretKeyD1 = HASH[weak](alicePass) // was PW_HASH
+	hashedPassD1 = HASH[weak](alicePass2) // Client-side hashing of password used in the "Double hashing"
 	// Encrypt the private keys
 	ikPrivEnc = ENC(secretKeyD1, ikPriv)
 	spkPrivEnc = ENC(secretKeyD1, spkPriv)
@@ -26,26 +24,26 @@ principal Device1[
 Device1 -> Server: hashedPassD1, ikPrivEnc, ikPub, spkPrivEnc, spkPub, opkPrivEnc, opkPub
 
 principal Server[
-	doubleHashedPass = PW_HASH(hashedPassD1)
+	doubleHashedPass = HASH[weak](hashedPassD1)
 ]
 
 principal Device2[
-	knows password alicePass
-	knows password alicePass2
-	hashedPassD2 = PW_HASH(alicePass2)
+	knows private alicePass
+	knows private alicePass2
+	hashedPassD2 = HASH[weak](alicePass2)
 ]
 
 // The server will re-hash the hashed password received by Alice to verify the password, then return the encrypted keys
 Device2 -> Server: hashedPassD2
 
 principal Server[
-	_ = ASSERT(doubleHashedPass, PW_HASH(hashedPassD2))?
+	_ = ASSERT(doubleHashedPass, HASH[weak](hashedPassD2))?
 ]
 
 Server -> Device2: ikPrivEnc, ikPub, spkPrivEnc, spkPub, opkPrivEnc, opkPub
 
 principal Device2[
-	secretKeyD2 = PW_HASH(alicePass)
+	secretKeyD2 = HASH[weak](alicePass)
 	ikPrivDec = DEC(secretKeyD2, ikPrivEnc)
 	spkPrivDec = DEC(secretKeyD2, spkPrivEnc)
 	opkPrivDec = DEC(secretKeyD2, opkPrivEnc)

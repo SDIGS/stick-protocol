@@ -1,8 +1,28 @@
 Verifpal 1.6.7 - https://verifpal.com
-parse error: unknown qualifier `password`
-  --> 03_re-establish.vp:10:8
-   |
-10 |     knows password alicePass
-   |           ^^^^^^^^
-   |
-   = note: `knows` takes one of `private` or `public`
+ Verifpal * Verification initiated for '03_re-establish.vp' at 11:05:18 AM.
+     Info . Analyzing 2 parallel sessions per principal; per-session values and principals are suffixed #2.
+     Info . Attacker is configured as active.
+     FAIL x confidentiality? alicepass2 (Analysis 1)
+
+--------------------------------------------------
+ Verifpal * Verification completed for '03_re-establish.vp' at 11:05:18 AM in 31ms.
+
+  Warning ! Analysis performed under 4 declared weakening assumptions:
+  Warning ! HASH[weak](alicepass)
+  Warning ! HASH[weak](alicepass2)
+  Warning ! HASH[weak](hashedpassd1)
+  Warning ! HASH[weak](hashedpassd2)
+
+     PASS + confidentiality? ikpriv  [search exhausted at 2 sessions]
+     PASS + confidentiality? spkpriv  [search exhausted at 2 sessions]
+     PASS + confidentiality? opkpriv  [search exhausted at 2 sessions]
+     PASS + confidentiality? alicepass  [search exhausted at 2 sessions]
+     FAIL x confidentiality? alicepass2
+            Attack trace:
+            | 1. Attacker observes hashedpassd1 on the wire.
+            | 2. Attacker breaks hashedpassd1 under the declared `weak` assumption, obtaining alicepass2.
+            > alicepass2 (alicepass2) is obtained by Attacker.
+
+--------------------------------------------------
+     FAIL x 1 of 5 queries failed.
+ Verifpal * Thank you for using Verifpal.
