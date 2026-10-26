@@ -17,8 +17,8 @@ to fail.
 | `03_re-establish.pv` | holds\* | **fails** | Backing up private keys to the server |
 | `04_backward_secrecy.pv` | holds† | holds | Recovery after a chain key is compromised |
 | `04_backward_secrecy_multi.pv` | holds† | **fails** | The same, concurrent sessions |
-| `05_malicious_no_explixit_server.pv` | holds | holds | Signature checked against a known key |
-| `05_malicious_no_explixit_server_multi.pv` | holds | **fails** | The same, concurrent sessions |
+| `05_malicious_no_explicit_server.pv` | holds | holds | Signature checked against a known key |
+| `05_malicious_no_explicit_server_multi.pv` | holds | **fails** | The same, concurrent sessions |
 
 \* The private keys are never derivable, but the model also reports a successful guessing attack against the password.
 
@@ -55,7 +55,7 @@ keys. `postX` in the two `04_` models is the same kind of control: it has to fal
 nothing the leak would be testing nothing.
 
 **A replay left open on purpose.** `02_sticky_session.pv`, `04_backward_secrecy_multi.pv` and
-`05_malicious_no_explixit_server_multi.pv` all fail the same way: one legitimate message delivered twice to two
+`05_malicious_no_explicit_server_multi.pv` all fail the same way: one legitimate message delivered twice to two
 instances of the recipient. Only the injective form breaks, so nothing was forged. Closing it needs the stateful
 mechanism described below, and the replay is orthogonal to what each of those models was written to measure. The
 implementation does track it, in [`GroupCipher.getSenderKey()`](../../android/app/src/main/java/com/stiiick/stickprotocol/internal/GroupCipher.java),
@@ -102,6 +102,6 @@ point, but the trailing `?` makes it a guard, so the branch is discarded there.
 Bob never reaches the decryption, and the confidentiality query ends up answered over an execution in which nothing of
 substance took place.
 
-`05_malicious_no_explixit_server.vp` reformulates the question without the scripted move, asking instead what happens
+`05_malicious_no_explicit_server.vp` reformulates the question without the scripted move, asking instead what happens
 when Bob accepts the verification key from the network rather than from a locally established value. Its two ProVerif
 counterparts are in the table above. See [NOTICE.md](../../NOTICE.md) for what this fork adds.

@@ -122,7 +122,7 @@ queries, `02_` and `04_` fail authentication and pass confidentiality, and
 `03_re-establish.vp` runs only after a modelling decision, since 1.x removed the constructs it used for passwords, and its verdicts are those of that decision rather than of the original. The output of each run is in `FormalVerification/VerifpalModels/outputs/`, and
 [NOTICE.md](./NOTICE.md) records what the migration changed and what each verdict means.
 
-`05_malicious_no_explixit_server.vp` passes under 0.52.0, and under 1.6.7 its confidentiality query still passes while authentication fails on the replay that version is able to see. It covers the same scenario as `05_malicious.vp`, but without
+`05_malicious_no_explicit_server.vp` passes under 0.52.0, and under 1.6.7 its confidentiality query still passes while authentication fails on the replay that version is able to see. It covers the same scenario as `05_malicious.vp`, but without
 a server principal scripted to tamper with the message. In the original, the signature check cannot do anything other
 than fail, so the test never gets to say anything about the protocol. See [NOTICE.md](./NOTICE.md).
 
