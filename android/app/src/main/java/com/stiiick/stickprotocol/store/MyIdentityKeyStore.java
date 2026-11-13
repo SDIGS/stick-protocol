@@ -97,7 +97,7 @@ public class MyIdentityKeyStore implements IdentityKeyStore {
 
     @Override
     public boolean isTrustedIdentity(SignalProtocolAddress address, IdentityKey identityKey, Direction direction) {
-        return true;
+        return true; 
     }
 
     public List<IdentityKeyRecord> loadIdentityKeys() {

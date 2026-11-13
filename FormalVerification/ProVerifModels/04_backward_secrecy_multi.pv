@@ -37,8 +37,8 @@ fun senc(bitstring, bitstring): bitstring.
 reduc forall msg: bitstring, key: bitstring; sdec(senc(msg, key), key) = msg.
 
 (* --- 3. EVENTS AND QUERIES --- *)
-event AliceInvia(G, bitstring).
-event BobRiceve(G, bitstring).
+event AliceSends(G, bitstring).
+event BobReceives(G, bitstring).
 
 (* Positive control: the old session must fall once its chain key is
    compromised. If this query passed, the leak would be biting nothing and the
@@ -48,7 +48,7 @@ query attacker(postX).
 (* Backward secrecy: the new session holds despite the compromise *)
 query attacker(postY).
 
-query m: bitstring; inj-event(BobRiceve(pk(aSigPrivY), m)) ==> inj-event(AliceInvia(pk(aSigPrivY), m)).
+query m: bitstring; inj-event(BobReceives(pk(aSigPrivY), m)) ==> inj-event(AliceSends(pk(aSigPrivY), m)).
 
 
 (* --- 4. ALICE'S PROCESS --- *)
@@ -78,7 +78,7 @@ let Alice() =
     let postYEnc = senc(postY, messageKeyY) in
     let postYSigned = sign(postYEnc, aSigPrivY) in
 
-    event AliceInvia(aSigPubY, postYEnc);
+    event AliceSends(aSigPubY, postYEnc);
     out(c, (aSigPubY, postYEnc, postYSigned));
     0.
 
@@ -94,7 +94,7 @@ let Bob(aSigPubY: G) =
     if checksign(postYSigned, aSigPubY) = postYEnc then
     let postYDec = sdec(postYEnc, messageKeyYB) in
 
-    event BobRiceve(aSigPubY, postYEnc);
+    event BobReceives(aSigPubY, postYEnc);
     0.
 
 

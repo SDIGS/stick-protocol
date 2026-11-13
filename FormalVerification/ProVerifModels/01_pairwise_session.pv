@@ -60,14 +60,14 @@ reduc forall k: bitstring, msg: bitstring, ad: bitstring;
     aead_dec(k, aead_enc(k, msg, ad), ad) = msg.
 
 (* --- 4. EVENTS AND QUERIES --- *)
-event AliceInvia(G, bitstring).
-event BobRiceve(G, bitstring).
+event AliceSends(G, bitstring).
+event BobReceives(G, bitstring).
 
 (* confidentiality? msg1 *)
 query attacker(secret_msg).
 
 (* authentication? Alice -> Bob: msg1Enc *)
-query m: bitstring; inj-event(BobRiceve(pk(aIkPriv), m)) ==> inj-event(AliceInvia(pk(aIkPriv), m)).
+query m: bitstring; inj-event(BobReceives(pk(aIkPriv), m)) ==> inj-event(AliceSends(pk(aIkPriv), m)).
 
 (* --- 5. ALICE'S PROCESS --- *)
 let Alice(aIkPriv: exponent, bIkPub: G) =
@@ -104,7 +104,7 @@ let Alice(aIkPriv: exponent, bIkPub: G) =
     let ad = hash3(G2B(aIkPub), G2B(bIkPub), G2B(aEk2Pub)) in
     let msg1Enc = aead_enc(aMk1, secret_msg, ad) in
     
-    event AliceInvia(aIkPub, msg1Enc);
+    event AliceSends(aIkPub, msg1Enc);
     out(c, (aIkPub, aEk1Pub, aEk2Pub, msg1Enc));
     
     (* --- PHASE 1: COMPROMISE FOR FORWARD SECRECY --- *)
@@ -142,7 +142,7 @@ let Bob(bIkPriv: exponent, bSpkPriv: exponent, bOpkPriv: exponent, aIkPub: G) =
     let ad = hash3(G2B(aIkPub), G2B(bIkPub), G2B(aEk2Pub)) in
     let msg1Dec = aead_dec(bMk1, msg1Enc, ad) in
     
-    event BobRiceve(aIkPub, msg1Enc);
+    event BobReceives(aIkPub, msg1Enc);
     
     (* --- PHASE 1: COMPROMISE FOR FORWARD SECRECY --- *)
     phase 1;

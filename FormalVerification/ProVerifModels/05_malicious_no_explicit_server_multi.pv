@@ -36,14 +36,14 @@ reduc forall m: bitstring, k: exponent; checksign(sign(m, k), pk(k)) = m.
 
 
 (* --- 3. EVENTS & QUERIES --- *)
-event AliceInvia(G, bitstring).
-event BobRiceve(G, bitstring).
+event AliceSends(G, bitstring).
+event BobReceives(G, bitstring).
 
 (* Confidentiality query for the post *)
 query attacker(post).
 
 (* Authentication queries for the post *)
-query m: bitstring, pub: G; inj-event(BobRiceve(pub, m)) ==> inj-event(AliceInvia(pub, m)).
+query m: bitstring, pub: G; inj-event(BobReceives(pub, m)) ==> inj-event(AliceSends(pub, m)).
 
 
 (* --- 4. ALICE'S PROCESS --- *)
@@ -58,7 +58,7 @@ let Alice(aChainKey: bitstring, aSigPriv: exponent) =
     let postEnc = senc(post, messageKey) in
     let postSigned = sign(postEnc, aSigPriv) in
 
-    event AliceInvia(aSigPub, post);
+    event AliceSends(aSigPub, post);
     out(c, (aSigPub, postEnc, postSigned));
     0.
 
@@ -75,7 +75,7 @@ let Bob(aChainKey: bitstring, aSigPub: G) =
 
     let postDec = sdec(postEnc, messageKey) in
 
-    event BobRiceve(aSigPub, postDec);
+    event BobReceives(aSigPub, postDec);
     0.
 
 

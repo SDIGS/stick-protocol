@@ -47,9 +47,9 @@ table seen_counters_charlie(counter).
 fun BlobData(bitstring, bitstring, bitstring, counter): bitstring [data].
 
 (* --- 3. EVENTS & QUERIES --- *)
-event AliceInvia(bitstring, counter).
-event BobRiceve(bitstring, counter).
-event CharlieRiceve(bitstring, counter).
+event AliceSends(bitstring, counter).
+event BobReceives(bitstring, counter).
+event CharlieReceives(bitstring, counter).
 
 (* Confidentiality query for the photo *)
 query attacker(photo).
@@ -58,8 +58,8 @@ query attacker(photo).
 query attacker(new ephAES).
 query attacker(new ephMAC).
 
-query p: bitstring, c: counter; inj-event(BobRiceve(p, c)) ==> inj-event(AliceInvia(p, c)).
-query p: bitstring, c: counter; inj-event(CharlieRiceve(p, c)) ==> inj-event(AliceInvia(p, c)).
+query p: bitstring, c: counter; inj-event(BobReceives(p, c)) ==> inj-event(AliceSends(p, c)).
+query p: bitstring, c: counter; inj-event(CharlieReceives(p, c)) ==> inj-event(AliceSends(p, c)).
 
 
 (* --- 4. ALICE'S PROCESS --- *)
@@ -84,7 +84,7 @@ let Alice(aChainKey: bitstring, aSigPriv: exponent) =
     let blobSecEnc = senc(blobSec, messageKey) in
     let blobSecSigned = sign(blobSecEnc, aSigPriv) in
 
-    event AliceInvia(blobSecEnc, msgCounter);
+    event AliceSends(blobSecEnc, msgCounter);
     out(c, (aSigPub, blobSecEnc, blobSecSigned, photoEnc));
 
     (* --- PHASE 1: COMPROMISE FOR SYMMETRIC RATCHET FORWARD SECRECY --- *)
@@ -115,7 +115,7 @@ let Bob(aChainKey: bitstring, aSigPub: G) =
     else
         insert seen_counters_bob(msgCounter);
         out(mutex_lock_bob, token);
-        event BobRiceve(blobSecEnc, msgCounter);
+        event BobReceives(blobSecEnc, msgCounter);
     0.
 
 (* --- 6. CHARLIE'S PROCESS --- *)
@@ -140,7 +140,7 @@ let Charlie(aChainKey: bitstring, aSigPub: G) =
     else
         insert seen_counters_charlie(msgCounter);
         out(mutex_lock_charlie, token);
-        event CharlieRiceve(blobSecEnc, msgCounter);
+        event CharlieReceives(blobSecEnc, msgCounter);
     0.
 
 (* --- 7. ENTRY POINT (MAIN) --- *)
