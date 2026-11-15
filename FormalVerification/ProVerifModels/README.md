@@ -19,6 +19,7 @@ to fail.
 | `04_backward_secrecy_multi.pv` | holds† | **fails** | The same, concurrent sessions |
 | `05_malicious_no_explicit_server.pv` | holds | holds | Signature checked against a known key |
 | `05_malicious_no_explicit_server_multi.pv` | holds | **fails** | The same, concurrent sessions |
+| `05_malicious_no_explicit_server_no_pinning.pv` | holds | **fails** | Bob accepts the signing key from the network, unpinned |
 
 \* The private keys are never derivable, but the model also reports a successful guessing attack against the password.
 
