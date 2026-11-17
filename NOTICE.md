@@ -46,7 +46,7 @@ FormalVerification/ProVerifModels/
 └── outputs/           the output of each model, one file per model
 ```
 
-Ten models, a translation of the Verifpal set into ProVerif with stronger queries. Authentication becomes injective, so a message accepted twice is a failure rather than a pass. Passwords are declared `weaksecret`, so the question becomes whether they survive offline guessing rather than whether they leak. Five models have no Verifpal counterpart. One removes a feature of the protocol to measure how much depends on it, three run the same protocol in many concurrent sessions rather than one, and one isolates the symmetric ratchet over two sequential messages.
+Eleven models, a translation of the Verifpal set into ProVerif, the tool behind the mechanized proofs of the Signal protocol and of TLS 1.3. The move is not about reaching queries Verifpal cannot express, Verifpal 1.6.7 already counts replay, as the Modifications section above shows. What changes is practice rather than expressiveness: a different modelling style, built on equational theories and Horn-clause resolution instead of Verifpal's own primitives, with its own trade-offs in how a protocol gets phrased and in how long the solver takes. Six models have no Verifpal counterpart: one removes a feature of the protocol to measure how much depends on it, three run the same protocol in many concurrent sessions rather than one, one isolates the symmetric ratchet over two sequential messages, and one — `05_malicious_no_explicit_server_no_pinning.pv` — is a pre-fix variant recovered from the fork's own git history, kept only for comparison against its fixed counterpart.
 
 ## Documentation
 
