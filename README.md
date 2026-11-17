@@ -106,62 +106,48 @@ yarn add stick-protocol-handlers@1.2.2
 
 ## Verification Tests
 
+The protocol's core properties are checked by two generations of formal models: a legacy set in
+<a href="https://verifpal.com/">Verifpal</a>, kept for reference, and a stricter translation into
+<a href="https://bblanche.gitlabpages.inria.fr/proverif/">ProVerif</a>, which is the one to trust going forward.
+
 ### Verifpal Models
 
-The Stick protocol has a set of verification tests that can be run to verify the correctness of the protocol.
-These tests are written using <a href="https://verifpal.com/">Verifpal</a>, a formal verification tool for cryptographic
-protocols. The tests are located under `FormalVerification` directory. After installing the Verifpal tool, the tests 
-can be run as follows:
-```
-verifpal verify test_file.vp
-```
-Under Verifpal 0.52.0, the version these models were written for, tests 01->04 pass and
-`05_malicious.vp` fails. Verifpal 1.0 rewrote the modelling language, so the files here carry
-the migrated syntax, and under 1.6.7 the verdicts are different. `01_` fails both of its
-queries, `02_` and `04_` fail authentication and pass confidentiality, and
-`03_re-establish.vp` runs only after a modelling decision, since 1.x removed the constructs it used for passwords, and its verdicts are those of that decision rather than of the original. The output of each run is in `FormalVerification/VerifpalModels/outputs/`, and
-[NOTICE.md](./NOTICE.md) records what the migration changed and what each verdict means.
-
-`05_malicious_no_explicit_server.vp` passes under 0.52.0, and under 1.6.7 its confidentiality query still passes while authentication fails on the replay that version is able to see. It covers the same scenario as `05_malicious.vp`, but without
-a server principal scripted to tamper with the message. In the original, the signature check cannot do anything other
-than fail, so the test never gets to say anything about the protocol. See [NOTICE.md](./NOTICE.md).
+Located under `FormalVerification/VerifpalModels` and run with `verifpal verify test_file.vp`. They were written for
+Verifpal 0.52.0, under which tests `01`-`04` pass and `05_malicious.vp` fails. Verifpal 1.0 rewrote the modelling
+language; on the migrated syntax (1.6.7) the verdicts shift — `01_` now fails both queries, `02_` and `04_` fail
+authentication but pass confidentiality, and `03_re-establish.vp` only runs after a modelling decision forced by 1.x
+dropping the constructs the original password model used, so its verdict reflects that decision rather than the
+original model. `05_malicious_no_explicit_server.vp` passes under 0.52.0 and keeps its confidentiality result under
+1.6.7, but now fails authentication on a replay that version can see; it covers the same scenario as `05_malicious.vp`
+without a scripted server principal, which in the original leaves the test unable to say anything about the protocol
+once the signature check fails. Outputs are in `outputs/`; what the migration changed and what each verdict means is
+in [NOTICE.md](./NOTICE.md).
 
 ### ProVerif Models
 
-There is a translation of the Verifpal models into <a href="https://bblanche.gitlabpages.inria.fr/proverif/">ProVerif</a>,
-under `FormalVerification/ProVerifModels`, with stricter queries. Where the Verifpal models ask whether a message was
-authentic, these also ask whether it could have been replayed and whether it is bound to the identity of whoever sent
-it, and where a password stands in for a secret, they ask whether it survives offline guessing.
+Located under `FormalVerification/ProVerifModels`: a translation of the same models with stricter queries. Where
+Verifpal asks only whether a message is authentic, these also ask whether it could have been replayed, whether it
+binds to the sender's identity, and — where a password stands in for a secret — whether it survives offline guessing.
+Six of the eleven have no Verifpal counterpart: one ablates a protocol feature to isolate how much depends on it,
+three run the same protocol under concurrent sessions, one isolates the symmetric ratchet over two sequential
+messages, and one is a historical pre-fix variant kept only for comparison against its fixed counterpart.
 
-Five of the ten have no Verifpal counterpart. One removes a feature of the protocol to measure how much depends on it,
-three run the same protocol across concurrent sessions rather than one, and one isolates the symmetric ratchet over
-two sequential messages.
-
-The models were written and checked against ProVerif 2.05, which on most systems comes from opam:
-```
-opam install proverif
-```
-The <a href="https://bblanche.gitlabpages.inria.fr/proverif/install.html">official install guide</a> covers the other ways.
-
-A single model runs with:
-```
-proverif file_name.pv
-```
-The output of every model is kept in `outputs/`, produced with:
+Written and checked against ProVerif 2.05 (`opam install proverif`; see the
+<a href="https://bblanche.gitlabpages.inria.fr/proverif/install.html">official guide</a> for other ways). Run and
+archive a model with:
 ```
 proverif file_name.pv > outputs/file_name.txt
 ```
-To regenerate all of them at once:
+or regenerate every output at once:
 ```
 for f in *.pv; do proverif "$f" > "outputs/${f%.pv}.txt"; done
 ```
-Eight of the ten finish in under a second. The two that declare Diffie-Hellman commutativity are slower, and the gap
-between them is itself informative. `01_pairwise_session_no_opk.pv` takes about six seconds, while
-`01_pairwise_session.pv` takes around eight minutes. The two differ only in the fourth Diffie-Hellman exchange, so one
-term is what separates seconds from minutes once the solver has to unify modulo that equation.
+Nine of the eleven finish in under a second; the two that declare Diffie-Hellman commutativity are slower, and by very
+different margins — about six seconds for `01_pairwise_session_no_opk.pv` against roughly eight minutes for
+`01_pairwise_session.pv`, which differ only in the fourth Diffie-Hellman exchange.
 
-Not every model is expected to pass, and the failures do not all mean the same thing. Some are the result the model was
-built to measure, one marks a limit of the tool, and some are replays left open on purpose. See
+Not every model is expected to pass, and the failures don't all mean the same thing: some are the result being
+measured, one marks a limit of the tool, others are replays left open on purpose. See
 [FormalVerification/ProVerifModels/README.md](./FormalVerification/ProVerifModels/README.md) for the expected result of
 each model and what its verdict means.
 
